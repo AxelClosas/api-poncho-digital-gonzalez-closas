@@ -1,0 +1,30 @@
+{
+  "name": "api-poncho-digital",
+  "version": "1.0.0",
+  "description": "API REST de aplicación web \"Poncho Digital\". Laboratorio de materia Desarrollo Backend.",
+  "keywords": [
+    "ExpressJS",
+    "Javascript",
+    "Node",
+    "Postgresql"
+  ],
+  "homepage": "https://github.com/AxelClosas/api-poncho-digital-gonzalez-closas#readme",
+  "bugs": {
+    "url": "https://github.com/AxelClosas/api-poncho-digital-gonzalez-closas/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AxelClosas/api-poncho-digital-gonzalez-closas.git"
+  },
+  "license": "MIT",
+  "author": "\"Gonzalez, Joaquin - Closas, Axel\"",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
