@@ -3,53 +3,67 @@ import {
     obtenerPostulaciones,
     obtenerPostulacionPorId,
     actualizarPostulacion,
-    elimanrPostulacion
-}from "../services/postulaciones.service.js";
+    eliminarPostulacion
+} from "../services/postulaciones.service.js";
 
+// POST /api/postulaciones
 export const crear = (req, res) => {
     const postulacion = crearPostulacion(req.body);
 
     res.status(201).json({
-        mensaje: "Postulacion creada correctamente",
+        mensaje: "Postulación creada correctamente",
         postulacion
     });
-}
+};
 
+// GET /api/postulaciones
 export const obtenerTodas = (req, res) => {
     const postulaciones = obtenerPostulaciones();
+
     res.status(200).json(postulaciones);
 };
 
-export const actualizar = (req, res) => {
+// GET /api/postulaciones/:id
+export const obtenerPorId = (req, res) => {
+    const postulacion = obtenerPostulacionPorId(req.params.id);
 
+    if (!postulacion) {
+        return res.status(404).json({
+            mensaje: "Postulación no encontrada"
+        });
+    }
+
+    res.status(200).json(postulacion);
+};
+
+// PUT /api/postulaciones/:id
+export const actualizar = (req, res) => {
     const postulacion = actualizarPostulacion(
         req.params.id,
-        req.body);
-    
-        if (!postulacion) {
-            return res.status(404).json({
-                mensaje: "Postulacion no encontrada"
-            });
-        }
+        req.body
+    );
 
-        res.status(200).json({
-            mensaje: "Postulacion actualizada correctamente",
-            postulacion
+    if (!postulacion) {
+        return res.status(404).json({
+            mensaje: "Postulación no encontrada"
         });
-}
+    }
 
-    export const eliminar = (req, res) =>{
-        const eliminada = eliminarPostulacion(req.params.id);
+    res.status(200).json({
+        mensaje: "Postulación actualizada correctamente",
+        postulacion
+    });
+};
 
-        if (!eliminada){
-            return res.status(404).json({
-                mensaje: "Postulacion no encontrada"
-            });
-        }
+// DELETE /api/postulaciones/:id
+export const eliminar = (req, res) => {
+    const eliminada = eliminarPostulacion(req.params.id);
 
-        res.status(200).json({
-            mensaje: "Postulacion eliminada correctamente"
+    if (!eliminada) {
+        return res.status(404).json({
+            mensaje: "Postulación no encontrada"
         });
     }
 
     res.status(204).send();
+};
