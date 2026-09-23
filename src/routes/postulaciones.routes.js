@@ -1,19 +1,19 @@
 import express from "express";
 
 import {
-    crear,
-    obtenerTodas,
-    obtenerPorId,
-    actualizar,
-    eliminar
+  crear,
+  obtenerTodas,
+  obtenerPorId,
+  actualizar,
+  eliminar
 } from "../controllers/postulaciones.controller.js";
 
 const router = express.Router();
 
-router.post("/api/postulaciones", crear);
-router.get("/api/postulaciones", obtenerTodas);
-router.get("/api/postulaciones/:id", obtenerPorId);
-router.put("/api/postulaciones/:id", actualizar);
-router.delete("/api/postulaciones/:id", eliminar);
+router.post("/", crear);
+router.get("/", obtenerTodas);
+router.get("/:id", obtenerPorId);
+router.put("/:id", actualizar);
+router.delete("/:id", eliminar);
 
 export default router;
