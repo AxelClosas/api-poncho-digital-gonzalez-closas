@@ -216,3 +216,56 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,node
+
+# ==========================================
+# Reglas personalizadas para el proyecto
+# ==========================================
+
+# Prisma & Bases de datos
+/src/generated/
+prisma/*.db
+prisma/*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.db
+*.db-journal
+
+# Variables de entorno y credenciales adicionales
+.env
+.env.*
+.env*.local
+!.env.example
+!.env*.example
+!.env.template
+
+# Editores e IDEs
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+*.iws
+
+# Asistentes de IA y configuración de agentes locales
+.agents/
+.claude/
+.windsurf/
+.cursor/
+.gemini/
+
+# Certificados, llaves SSL y secretos
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Archivos temporales, respaldos y cargas (uploads)
+uploads/
+temp/
+tmp/
+*.swp
+*.swo
+*.dump
+*.backup
