@@ -36,18 +36,41 @@ export const obtenerUsuarioPorId = async (id) => {
  * Crear un nuevo usuario (rol visitante por defecto si no se especifica)
  */
 export const crearUsuario = async (datos) => {
+
   const { cuil, ape_y_nom, localidad, provincia, email, password, id_rol } = datos
 
-  if (!cuil || !ape_y_nom || !localidad || !provincia || !email || !password) {
-    throw crearError("Faltan campos requeridos para crear el usuario", 400, {
-      camposRequeridos: ["cuil", "ape_y_nom", "localidad", "provincia", "email", "password"]
+  const rolExistente = await prisma.rol.findFirst({
+    where: { id: id_rol }
+  })
+
+  if (!rolExistente) {
+    throw crearError("El rol especificado no existe", 400, { campo: "id_rol" })
+  }
+
+  // Verificar previamente para evitar que el INSERT consuma un valor de la secuencia autoincremental en PostgreSQL
+  const usuarioExistente = await prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { email },
+        { cuil: String(cuil) }
+      ]
+    }
+  })
+
+  if (usuarioExistente) {
+    const camposDuplicados = []
+    if (usuarioExistente.email === email) camposDuplicados.push("email")
+    if (usuarioExistente.cuil === String(cuil)) camposDuplicados.push("cuil")
+
+    throw crearError("El email o CUIL ya se encuentra registrado", 409, {
+      campos: camposDuplicados
     })
   }
 
   try {
     return await prisma.usuario.create({
       data: {
-        cuil,
+        cuil: String(cuil),
         ape_y_nom,
         localidad,
         provincia,
@@ -79,12 +102,6 @@ export const actualizarUsuario = async (id, datos) => {
   const usuarioId = Number(id)
   const { cuil, ape_y_nom, localidad, provincia, email, password, id_rol } = datos
 
-  if (!cuil || !ape_y_nom || !localidad || !provincia || !email || !password) {
-    throw crearError("Faltan campos requeridos para actualizar el usuario vía PUT", 400, {
-      camposRequeridos: ["cuil", "ape_y_nom", "localidad", "provincia", "email", "password"]
-    })
-  }
-
   const existente = await prisma.usuario.findUnique({
     where: { id: usuarioId }
   })
@@ -93,11 +110,21 @@ export const actualizarUsuario = async (id, datos) => {
     throw crearError("Usuario no encontrado", 404)
   }
 
+  if (id_rol) {
+    const rolExistente = await prisma.rol.findFirst({
+      where: { id: id_rol }
+    })
+
+    if (!rolExistente) {
+      throw crearError("El rol especificado no existe", 400, { campo: "id_rol" })
+    }
+  }
+
   try {
     return await prisma.usuario.update({
       where: { id: usuarioId },
       data: {
-        cuil,
+        cuil: String(cuil),
         ape_y_nom,
         localidad,
         provincia,

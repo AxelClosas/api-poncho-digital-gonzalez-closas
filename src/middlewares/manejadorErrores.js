@@ -3,10 +3,10 @@ export const manejadorErrores = (err, req, res, next) => {
 
   if (status >= 500) {
     console.error(err)
-    return res.status(status).json({ error: 'Error interno del servidor' })
+    return res.status(status).json({ mensaje: 'Error interno del servidor' })
   }
 
-  const respuesta = { error: err.message }
+  const respuesta = { mensaje: err.message }
   if (err.detalles !== undefined && err.detalles !== null) {
     respuesta.detalles = err.detalles
   }
