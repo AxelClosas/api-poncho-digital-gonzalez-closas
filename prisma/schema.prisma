@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/**
+ * ROL (id_rol, nombre)
+ * RUBRO (id_rubro, nombre, createdAt, updatedAt)
+ * SECTOR (id_sector, nombre, createdAt, updatedAt)
+ * ESTADO (id_estado, nombre) -> aprobado, rechazado, pendiente, mod_solicitada
+ * USUARIO (id_usuario, cuil, ape_y_nom, localidad, provincia, email, password_hash, id_rol, createdAt, updatedAt)
+ * EMPRENDIMIENTO (id_emprendimiento, nombre, descripcion, id_usuario, id_rubro, createdAt, updatedAt)
+ * PRODUCTO (id_producto, nombre, descripcion, precio, id_emprendimiento, createdAt, updatedAt)
+ * STAND (id_stand, coord_lat, coord_long,  id_sector, id_usuario, createdAt, updatedAt)
+ * INSCRIPCION (id_inscripcion, fecha_solicitud, id_estado, observaciones, fecha_evaluacion, id_artesano, id_administrador, createdAt, updatedAt)
+ * HISTORIAL (id_historial, termino_busqueda, seccion_buscada, fecha_hora, id_usuario, createdAt)
+ */
+
+model Rol {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  usuarios Usuario[]
+}
+
+model Rubro {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  emprendimientos Emprendimiento[]
+}
+
+model Sector {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stands    Stand[]
+}
+
+model Estado {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  inscripcions Inscripcion[]
+}
+
+model Usuario {
+  id        Int    @id @default(autoincrement())
+  cuil      String @unique
+  ape_y_nom String
+  localidad String
+  provincia String
+  email     String @unique
+  password  String
+  id_rol    Int    @default(3) // Por defecto todos son visitantes
+  rol       Rol    @relation(fields: [id_rol], references: [id], onDelete: Restrict)
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  emprendimiento Emprendimiento?
+  stand          Stand?
+
+  inscripcionesSolicitadas Inscripcion[] @relation("InscripcionesSolicitadas")
+  inscripcionesVerificadas Inscripcion[] @relation("InscripcionesVerificadas")
+  historial                Historial[]
+}
+
+model Emprendimiento {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  id_usuario  Int     @unique
+  id_rubro    Int
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  rubro   Rubro   @relation(fields: [id_rubro], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productos Producto[]
+}
+
+model Producto {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  precio      Float?
+
+  id_emprendimiento Int
+  emprendimiento    Emprendimiento @relation(fields: [id_emprendimiento], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Stand {
+  id         Int   @id @default(autoincrement())
+  coord_lat  Float
+  coord_long Float
+  id_sector  Int?
+  id_usuario Int?  @unique
+
+  sector  Sector?  @relation(fields: [id_sector], references: [id], onDelete: SetNull)
+  usuario Usuario? @relation(fields: [id_usuario], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Inscripcion {
+  id               Int       @id @default(autoincrement())
+  fecha_solicitud  DateTime  @default(now())
+  id_estado        Int       @default(3) // Todas las inscripciones son pendientes al inicio
+  observaciones    String?
+  fecha_evaluacion DateTime?
+
+  id_artesano      Int
+  id_administrador Int?
+
+  estado Estado @relation(fields: [id_estado], references: [id])
+
+  artesano      Usuario  @relation("InscripcionesSolicitadas", fields: [id_artesano], references: [id], onDelete: Cascade)
+  administrador Usuario? @relation("InscripcionesVerificadas", fields: [id_administrador], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Historial {
+  id               Int      @id @default(autoincrement())
+  termino_busqueda String
+  seccion_buscada  String
+  fecha_hora       DateTime @default(now())
+  id_usuario       Int?
+
+  usuario Usuario? @relation(fields: [id_usuario], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
