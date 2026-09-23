@@ -250,6 +250,7 @@ prisma/*.db-journal
 .agents/
 .claude/
 .windsurf/
+.devin/
 .cursor/
 .gemini/
 
