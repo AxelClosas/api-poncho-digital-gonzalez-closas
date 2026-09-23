@@ -127,6 +127,7 @@ model Inscripcion {
   id               Int       @id @default(autoincrement())
   fecha_solicitud  DateTime  @default(now())
   id_estado        Int       @default(3) // Todas las inscripciones son pendientes al inicio
+  trayectoria      String
   observaciones    String?
   fecha_evaluacion DateTime?
 
