@@ -5,7 +5,7 @@ import { noEncontrado } from "./middlewares/noEncontrado.js"
 import postulacionesRoutes from "./routes/postulaciones.routes.js"
 
 const app = express();
-//const PORT = 3000;
+const PORT = 3000;
 app.use(logger)
 app.use(express.json());
 
@@ -19,8 +19,8 @@ app.use(noEncontrado)
 
 app.use(manejadorErrores)
 
-/*app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});*/
+});
 
 export default app;
