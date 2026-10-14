@@ -14,24 +14,22 @@ export const obtenerStandPorId = async (id) => {
 
 export const crearStand = async (datos) => {
     return await prisma.stand.create({
-    data: {
-        numero: datos.numero,
-        ...(datos.estado !== undefined && {
-        estado: datos.estado
-        })
-    }
+        data: {
+            nombre: datos.nombre,
+            estado: datos.estado
+        }
     });
 };
 
 export const actualizarStand = async (id, datos) => {
     return await prisma.stand.update({
-    where: {
-        id: Number(id)
-    },
-    data: {
-        numero: datos.numero,
-        estado: datos.estado
-    }
+        where: {
+            id: Number(id)
+        },
+        data: {
+            nombre: datos.nombre,
+            estado: datos.estado
+        }
     });
 };
 

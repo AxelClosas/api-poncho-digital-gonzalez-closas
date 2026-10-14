@@ -14,7 +14,7 @@ import { validarSchema } from "../middlewares/validarSchema.js";
 import {
     crearPabellonSchema,
     actualizarPabellonSchema
-} from "../schemas/pabellon.schema.js";
+} from "../schema/pabellon.schema.js";
 
 const router = Router();
 

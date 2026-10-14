@@ -30,11 +30,37 @@ export const obtenerPorId = async (req, res, next) => {
 
 export const crear = async (req, res, next) => {
     try {
-    const stand = await standService.crearStand(req.body);
+        const { numero, nombre, estado } = req.body;
 
-    res.status(201).json(stand);
+        if (typeof numero !== "string" || !numero.trim()) {
+            return res.status(400).json({
+                mensaje: "El número del stand es obligatorio"
+            });
+        }
+
+        if (typeof nombre !== "string" || !nombre.trim()) {
+            return res.status(400).json({
+                mensaje: "El nombre del stand es obligatorio"
+            });
+        }
+
+        if (estado !== undefined &&
+            !["DISPONIBLE", "OCUPADO"].includes(estado)) {
+            return res.status(400).json({
+                mensaje: "El estado debe ser DISPONIBLE u OCUPADO"
+            });
+        }
+
+        const nuevoStand = await standService.crearStand({
+            numero: numero.trim(),
+            nombre: nombre.trim(),
+            estado: estado ?? "DISPONIBLE"
+        });
+
+        return res.status(201).json(nuevoStand);
+
     } catch (error) {
-    next(error);
+        next(error);
     }
 };
 

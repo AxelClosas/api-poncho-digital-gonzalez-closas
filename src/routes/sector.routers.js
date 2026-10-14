@@ -14,7 +14,7 @@ import { validarSchema } from "../middlewares/validarSchema.js";
 import {
     crearSectorSchema,
     actualizarSectorSchema
-} from "../schemas/sector.schema.js";
+} from "../schema/sector.schema.js";
 
 const router = Router();
 

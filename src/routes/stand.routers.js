@@ -14,7 +14,7 @@ import { validarSchema } from "../middlewares/validarSchema.js";
 import {
     crearStandSchema,
     actualizarStandSchema
-} from "../schemas/stand.schema.js";
+} from "../schema/stand.schema.js";
 
 const router = Router();
 
