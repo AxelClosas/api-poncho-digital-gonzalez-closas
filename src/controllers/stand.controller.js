@@ -1,4 +1,4 @@
-import * as standService from "../services/stand.service.js";
+import * as standService from "../services/stand.services.js";
 
 export const obtenerTodos = async (req, res, next) => {
     try {

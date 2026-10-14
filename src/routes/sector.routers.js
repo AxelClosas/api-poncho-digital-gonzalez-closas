@@ -1,4 +1,4 @@
-import {router} from "express";
+import {Router} from "express";
 
 import{
     obtenerTodos,
@@ -16,9 +16,9 @@ import {
     actualizarSectorSchema
 } from "../schemas/sector.schema.js";
 
-const router = router();
+const router = Router();
 
-router.ger("/", obtenerTodos);
+router.get("/", obtenerTodos);
 
 router.get("/:id",validarId, obtenerPorId);
 
