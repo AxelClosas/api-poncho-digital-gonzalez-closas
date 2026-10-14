@@ -3,11 +3,14 @@ import { logger } from "./middlewares/logger.js"
 import { manejadorErrores } from "./middlewares/manejadorErrores.js"
 import { noEncontrado } from "./middlewares/noEncontrado.js"
 import postulacionesRoutes from "./routes/postulaciones.routes.js"
+import pabellonRoutes from "./routes/pabellon.routes.js"
 
 const app = express();
 const PORT = 3000;
 app.use(logger)
 app.use(express.json());
+
+app.use("/api/pabellones",pabellonRoutes);
 
 app.use(postulacionesRoutes);
 
