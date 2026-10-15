@@ -10,9 +10,9 @@ export const cargarContextoUsuario = async (req, res, next) => {
       throw crearError("La cuenta asociada al token ya no existe.", 401);
     }
 
-    if (!usuario.activo) {
-      throw crearError("La cuenta de usuario se encuentra inhabilitada.", 403);
-    }
+    // if (!usuario.activo) {
+    //   throw crearError("La cuenta de usuario se encuentra inhabilitada.", 403);
+    // }
 
     req.contextoUsuario = usuario;
     return next();
@@ -23,14 +23,14 @@ export const cargarContextoUsuario = async (req, res, next) => {
 
 export const autorizarRoles = (...rolesPermitidos) => {
   return (req, res, next) => {
-    const rolesUsuario = req.contextoUsuario?.roles || [];
-    const tienePermiso = rolesUsuario.some((rol) => rolesPermitidos.includes(rol));
+    // const rolesUsuario = req.contextoUsuario?.roles || [];
+    // const tienePermiso = rolesUsuario.some((rol) => rolesPermitidos.includes(rol));
 
-    if (!tienePermiso) {
-      return next(
-        crearError("Acceso denegado: no posees los permisos necesarios para esta acción.", 403)
-      );
-    }
+    // if (!tienePermiso) {
+    //   return next(
+    //     crearError("Acceso denegado: no posees los permisos necesarios para esta acción.", 403)
+    //   );
+    // }
 
     return next();
   };

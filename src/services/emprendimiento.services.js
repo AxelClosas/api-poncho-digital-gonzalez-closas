@@ -96,35 +96,41 @@ export const obtenerEmprendimientoPorId = async (id) => {
 };*/
 
 export const actualizarEmprendimiento = async (
-    id,
-    datos,
-    usuarioActual
+  id,
+  datos,
+  usuarioActual
 ) => {
-    const emprendimiento = await prisma.emprendimiento.findUnique({
+  const emprendimiento = await prisma.emprendimiento.findUnique({
     where: { id },
-    });
+  });
 
-    if (!emprendimiento) {
+  if (!emprendimiento) {
     throw crearError("Emprendimiento no encontrado.", 404);
-    }
+  }
 
-    const esAdmin = usuarioActual.roles.includes("ADMINISTRADOR");
-    const esPropietario = emprendimiento.usuarioId === usuarioActual.id;
+  const esAdmin = usuarioActual.roles.includes("ADMINISTRADOR");
+  const esPropietario = emprendimiento.usuarioId === usuarioActual.id;
 
-    if (!esAdmin && !esPropietario) {
+  if (!esAdmin && !esPropietario) {
     throw crearError(
-        "No tenés permiso para modificar este emprendimiento.",
-        403
+      "No tenés permiso para modificar este emprendimiento.",
+      403
     );
-    }
+  }
 
-    return prisma.emprendimiento.update({
+  if (datos.rubroId !== undefined) {
+    await validarRubro(prisma, datos.rubroId);
+  }
+
+  return prisma.emprendimiento.update({
     where: { id },
     data: {
-        nombre: datos.nombre,
-        descripcion: datos.descripcion,
+      nombre: datos.nombre,
+      descripcion: datos.descripcion,
+      rubroId: datos.rubroId,
     },
-    });
+    select: seleccionEmprendimiento,
+  });
 };
 
 export const eliminarEmprendimiento = async (id) => {

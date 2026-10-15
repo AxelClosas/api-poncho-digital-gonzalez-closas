@@ -3,24 +3,58 @@ import { z } from "zod";
 // Schema para la postulación pública completa
 export const postularseSchema = z
   .object({
-    nombre: z.string({ required_error: "El nombre es obligatorio." }).trim().min(2),
-    // NUEVOS CAMPOS OBLIGATORIOS SEGÚN PRISMA:
-    apellido: z.string({ required_error: "El apellido es obligatorio." }).trim().min(2),
-    cuil: z.string().trim().regex(/^\d{11}$/, "El CUIL debe tener 11 dígitos numéricos sin guiones."),
-    fechaNacimiento: z.string().datetime({ message: "Formato de fecha inválido (debe ser ISO 8601)" }).transform(val => new Date(val)),
-    sexo: z.string().trim().min(1, "El sexo es obligatorio."),
-    
-    email: z.string().trim().toLowerCase().email("El formato de email no es válido."),
-    password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres."),
-    localidadId: z.number().int().positive(),
+    nombre: z
+      .string({ required_error: "El nombre es obligatorio." })
+      .trim()
+      .min(2, "El nombre debe tener al menos 2 caracteres."),
+    apellido: z
+      .string({ required_error: "El apellido es obligatorio." })
+      .trim()
+      .min(2, "El apellido debe tener al menos 2 caracteres."),
+    cuil: z
+      .string({ required_error: "El CUIL es obligatorio." })
+      .trim()
+      .transform((val) => val.replace(/-/g, ""))
+      .refine((val) => /^\d{11}$/.test(val), "El CUIL debe contener 11 dígitos numéricos."),
+    fechaNacimiento: z.coerce.date({
+      required_error: "La fecha de nacimiento es obligatoria.",
+      invalid_type_error: "Formato de fecha inválido.",
+    }),
+    sexo: z
+      .string({ required_error: "El sexo es obligatorio." })
+      .trim()
+      .min(1, "El sexo es obligatorio."),
+    email: z
+      .string({ required_error: "El email es obligatorio." })
+      .trim()
+      .toLowerCase()
+      .email("El formato de email no es válido."),
+    password: z
+      .string({ required_error: "La contraseña es obligatoria." })
+      .min(8, "La contraseña debe tener al menos 8 caracteres."),
+    localidadId: z.coerce
+      .string({ required_error: "La localidad es obligatoria." })
+      .regex(/^\d+$/, "El ID de localidad debe ser numérico.")
+      .transform((val) => BigInt(val)),
 
-    emprendimiento: z.object({
-      nombre: z.string().trim().min(2),
-      descripcion: z.string().trim().optional().nullable(),
-      rubroId: z.number().int().positive(),
-    }).strict(),
+    emprendimiento: z
+      .object({
+        nombre: z
+          .string({ required_error: "El nombre del emprendimiento es obligatorio." })
+          .trim()
+          .min(2, "El nombre del emprendimiento debe tener al menos 2 caracteres."),
+        descripcion: z.string().trim().max(1000).optional().nullable(),
+        rubroId: z
+          .number({ required_error: "El rubro es obligatorio." })
+          .int()
+          .positive("El ID de rubro debe ser un entero positivo."),
+      })
+      .strict(),
 
-    nroEdicion: z.number().int().positive(),
+    nroEdicion: z
+      .number({ required_error: "El número de edición es obligatorio." })
+      .int()
+      .positive("El número de edición debe ser un entero positivo."),
   })
   .strict();
 
@@ -42,7 +76,7 @@ export const cambiarEstadoSchema = z
       .number({ required_error: "El estadoId es obligatorio." })
       .int()
       .positive("El ID del estado debe ser un entero positivo."),
-    standId: z.number().int().positive().optional(), // Opcional si se aprueba y se asigna stand
+    standId: z.number().int().positive().nullable().optional(), // Opcional si se aprueba y se asigna stand
   })
   .strict();
 
