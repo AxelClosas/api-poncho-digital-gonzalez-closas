@@ -1,86 +1,53 @@
 import * as pabellonService from "../services/pabellon.service.js";
 
 export const obtenerTodos = async (req, res, next) => {
-    try {
+  try {
     const pabellones = await pabellonService.obtenerPabellones();
-
-    res.status(200).json(pabellones);
-    } catch (error) {
-    next(error);
-    }
+    return res.status(200).json(pabellones);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const obtenerPorId = async (req, res, next) => {
-    try {
+  try {
     const pabellon = await pabellonService.obtenerPabellonPorId(
-        req.params.id
+      req.parametrosValidados.id
     );
-
-    if (!pabellon) {
-        return res.status(404).json({
-        mensaje: "Pabellón no encontrado"
-        });
-    }
-
-    res.status(200).json(pabellon);
-    } catch (error) {
-    next(error);
-    }
+    return res.status(200).json(pabellon);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const crear = async (req, res, next) => {
-    try {
-    const pabellon = await pabellonService.crearPabellon(
-        req.body
-    );
-
-    res.status(201).json(pabellon);
-    } catch (error) {
-    next(error);
-    }
+  try {
+    const nuevoPabellon = await pabellonService.crearPabellon(req.bodyValidado);
+    return res.status(201).json(nuevoPabellon);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const actualizar = async (req, res, next) => {
-    try {
-    const existente = await pabellonService.obtenerPabellonPorId(
-        req.params.id
+  try {
+    const pabellonActualizado = await pabellonService.actualizarPabellon(
+      req.parametrosValidados.id,
+      req.bodyValidado
     );
-
-    if (!existente) {
-        return res.status(404).json({
-        mensaje: "Pabellón no encontrado"
-        });
-    }
-
-    const pabellon = await pabellonService.actualizarPabellon(
-        req.params.id,
-        req.body
-    );
-
-    res.status(200).json(pabellon);
-    } catch (error) {
-    next(error);
-    }
+    return res.status(200).json(pabellonActualizado);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const eliminar = async (req, res, next) => {
-    try {
-    const existente = await pabellonService.obtenerPabellonPorId(
-        req.params.id
-    );
-
-    if (!existente) {
-        return res.status(404).json({
-        mensaje: "Pabellón no encontrado"
-        });
-    }
-
-    await pabellonService.eliminarPabellon(req.params.id);
-
-    res.status(200).json({
-        mensaje: "Pabellón eliminado correctamente"
+  try {
+    await pabellonService.eliminarPabellon(req.parametrosValidados.id);
+    return res.status(200).json({
+      mensaje: "Pabellón eliminado correctamente.",
     });
-    } catch (error) {
-    next(error);
-    }
+  } catch (error) {
+    return next(error);
+  }
 };

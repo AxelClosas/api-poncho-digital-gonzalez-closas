@@ -6,15 +6,15 @@ import {
     crear,
     actualizar,
     eliminar
-} from "../controllers/stand.controller.js";
-
-import { validarId } from "../middlewares/validarId.js";
-import { validarSchema } from "../middlewares/validarSchema.js";
+} from "../controllers/emprendimiento.controller.js";
 
 import {
-    crearStandSchema,
-    actualizarStandSchema
-} from "../schema/stand.schema.js";
+    crearEmprendimientoSchema,
+    actualizarEmprendimientoSchema
+} from "../validators/emprendimiento.schema.js";
+
+import { validarSchema } from "../middlewares/validarSchema.js";
+import { validarId } from "../middlewares/validarId.js";
 
 const router = Router();
 
@@ -24,14 +24,14 @@ router.get("/:id", validarId, obtenerPorId);
 
 router.post(
     "/",
-    validarSchema(crearStandSchema),
+    validarSchema(crearEmprendimientoSchema),
     crear
 );
 
 router.put(
     "/:id",
     validarId,
-    validarSchema(actualizarStandSchema),
+    validarSchema(actualizarEmprendimientoSchema),
     actualizar
 );
 
