@@ -8,3 +8,9 @@ export const manejadorErrores = (err, req, res, next) => {
 
   res.status(status).json({ error: err.message })
 }
+
+export const noEncontrado = (req, res) => {
+  res.status(404).json({
+    mensaje: `Ruta no encontrada: ${req.method} ${req.originalUrl}`
+  })
+}
