@@ -29,6 +29,9 @@ import {
   rolParamSchema,
 } from "../validators/usuarios.schemas.js";
 
+import { cerrarSesion } from "../controllers/sesiones.controller.js";
+
+
 const router = express.Router();
 
 // Middleware compuesto: solo usuarios autenticados con rol ADMINISTRADOR
@@ -40,6 +43,7 @@ const controlAdministrador = [
 
 // 1. Ruta pública de acceso
 router.post("/login", validarBody(iniciarSesionSchema), iniciarSesion);
+router.post("/logout", autenticarUsuario, cerrarSesion);
 
 // 2. Ruta para obtener el perfil propio del usuario autenticado
 router.get("/me", autenticarUsuario, cargarContextoUsuario, obtenerMiPerfil);

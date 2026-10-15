@@ -1,4 +1,3 @@
-// src/routes/rubro.routes.js
 import { Router } from "express";
 import {
   obtenerTodos,
@@ -12,11 +11,14 @@ import {
   cargarContextoUsuario,
   autorizarRoles,
 } from "../middlewares/autorizacion.middleware.js";
-import { validarId } from "../middlewares/validarId.js";
-import { validarSchema } from "../middlewares/validarSchema.js";
+import {
+  validarBody,
+  validarParametros,
+} from "../middlewares/validacion.middleware.js";
 import {
   crearRubroSchema,
   actualizarRubroSchema,
+  rubroIdParamSchema,
 } from "../validators/rubro.schema.js";
 
 const router = Router();
@@ -29,11 +31,29 @@ const soloAdmin = [
 
 // Rutas Públicas (Lectura)
 router.get("/", obtenerTodos);
-router.get("/:id", validarId, obtenerPorId);
+router.get("/:id", validarParametros(rubroIdParamSchema), obtenerPorId);
 
-// Rutas Protegidas
-router.post("/", ...soloAdmin, validarSchema(crearRubroSchema), crear);
-router.put("/:id", ...soloAdmin, validarId, validarSchema(actualizarRubroSchema), actualizar);
-router.delete("/:id", ...soloAdmin, validarId, eliminar);
+// Rutas Protegidas (Gestión Administrativa)
+router.post(
+  "/",
+  ...soloAdmin,
+  validarBody(crearRubroSchema),
+  crear
+);
+
+router.put(
+  "/:id",
+  ...soloAdmin,
+  validarParametros(rubroIdParamSchema),
+  validarBody(actualizarRubroSchema),
+  actualizar
+);
+
+router.delete(
+  "/:id",
+  ...soloAdmin,
+  validarParametros(rubroIdParamSchema),
+  eliminar
+);
 
 export default router;

@@ -1,4 +1,3 @@
-// src/routes/inscripciones.routes.js
 import express from "express";
 import {
   postularse,
@@ -30,10 +29,10 @@ const evaluadoresOAdmin = [
   autorizarRoles("ADMINISTRADOR", "EVALUADOR"),
 ];
 
-// 1. Postulación pública
+// 1. Postulación pública (abierta a postulantes)
 router.post("/postularse", validarBody(postularseSchema), postularse);
 
-// 2. Consulta y evaluación protegida
+// 2. Consulta de trámites (requiere rol ADMINISTRADOR o EVALUADOR)
 router.get(
   "/",
   ...evaluadoresOAdmin,
@@ -41,6 +40,7 @@ router.get(
   consultarInscripciones
 );
 
+// 3. Evaluar trámite (cambiar estado y opcionalmente asignar/liberar stand)
 router.patch(
   "/:id/estado",
   ...evaluadoresOAdmin,

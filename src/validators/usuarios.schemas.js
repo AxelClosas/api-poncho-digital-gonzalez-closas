@@ -24,6 +24,10 @@ export const crearAdministradorSchema = z
       .string({ required_error: "El nombre es obligatorio." })
       .trim()
       .min(2, "El nombre debe tener al menos 2 caracteres."),
+    apellido: z
+      .string({ required_error: "El apellido es obligatorio." })
+      .trim()
+      .min(2, "El apellido debe tener al menos 2 caracteres."),
     email: z
       .string({ required_error: "El email es obligatorio." })
       .trim()
@@ -32,26 +36,21 @@ export const crearAdministradorSchema = z
     password: z
       .string({ required_error: "La contraseña es obligatoria." })
       .min(8, "La contraseña debe tener al menos 8 caracteres."),
-    localidadId: z
-      .number({ required_error: "La localidad es obligatoria." })
-      .int()
-      .positive("El ID de localidad debe ser un entero positivo."),
-    apellido: z
-      .string({ required_error: "El apellido es obligatorio." })
-      .trim()
-      .min(2, "El apellido debe tener al menos 2 caracteres."),
-    sexo: z
-      .enum(["M", "F"], {
-        required_error: "El sexo es obligatorio.",  
-      }),
     cuil: z
       .string({ required_error: "El CUIL es obligatorio." })
       .trim()
       .regex(/^\d{2}-\d{8}-\d$/, "El CUIL debe tener el formato XX-XXXXXXXX-X."),
-    fecaDeNacimiento: z
-      .string({ required_error: "La fecha de nacimiento es obligatoria." })
-      .trim(),
-    
+    sexo: z.enum(["M", "F"], {
+      required_error: "El sexo es obligatorio.",
+    }),
+    fechaNacimiento: z.coerce.date({
+      required_error: "La fecha de nacimiento es obligatoria.",
+      invalid_type_error: "Formato de fecha de nacimiento inválido.",
+    }),
+    localidadId: z.coerce
+      .string({ required_error: "La localidad es obligatoria." })
+      .regex(/^\d+$/, "El ID de localidad debe ser numérico.")
+      .transform((val) => BigInt(val)),
   })
   .strict();
 
@@ -71,13 +70,17 @@ export const iniciarSesionSchema = z
 
 // DTO para filtros y paginación de usuarios
 export const consultarUsuariosSchema = z.object({
-  busqueda: z.string().trim().optional(), // Búsqueda por nombre o email
+  busqueda: z.string().trim().optional(), // Búsqueda por nombre, apellido, email o cuil
   activo: z
     .enum(["true", "false"])
     .transform((val) => val === "true")
     .optional(),
   rol: z.string().trim().optional(),
-  localidadId: z.coerce.number().int().positive().optional(),
+  localidadId: z.coerce
+    .string()
+    .regex(/^\d+$/, "El ID de localidad debe ser numérico.")
+    .transform((val) => BigInt(val))
+    .optional(),
   ordenPor: z.enum(["nombre", "email", "createdAt"]).default("createdAt"),
   direccion: z.enum(["asc", "desc"]).default("desc"),
   pagina: z.coerce.number().int().positive().default(1),

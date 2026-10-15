@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { secretoJWT } from "../config/jwt.js";
-import { crearError } from "../utils/errores.js";
 
 export const generarToken = (usuario) => {
   return jwt.sign(
@@ -10,24 +9,27 @@ export const generarToken = (usuario) => {
     secretoJWT,
     {
       algorithm: "HS256",
-      expiresIn: "4h",
+      expiresIn: "15m",
     }
   );
 };
 
 export const verificarToken = (token) => {
-  // Si expira o la firma es inválida, jwt.verify lanza el error directamente
   const payload = jwt.verify(token, secretoJWT, {
     algorithms: ["HS256"],
   });
 
-  // Validamos que el payload decodificado contenga un UUID válido en el campo sub
   if (
     typeof payload !== "object" ||
     payload === null ||
-    !z.string().uuid().safeParse(payload.sub).success
+    !z.string().uuid().safeParse(payload.sub).success ||
+    !Number.isFinite(payload.exp)
   ) {
-    throw crearError("El contenido del token no es válido.", 401);
+    throw new jwt.JsonWebTokenError("Contenido del token inválido.");
+  }
+
+  if (typeof payload.jti !== "string" || !payload.jti.trim()) {
+    throw new jwt.JsonWebTokenError("Falta el identificador del token.");
   }
 
   return {
