@@ -1,40 +1,59 @@
 import { Router } from "express";
-
 import {
-    obtenerTodos,
-    obtenerPorId,
-    crear,
-    actualizar,
-    eliminar
+  obtenerTodos,
+  obtenerPorId,
+  crear,
+  actualizar,
+  eliminar,
 } from "../controllers/pabellon.controller.js";
-
-import { validarId } from "../middlewares/validarId.js";
-import { validarSchema } from "../middlewares/validarSchema.js";
-
+import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
 import {
-    crearPabellonSchema,
-    actualizarPabellonSchema
-} from "../schema/pabellon.schema.js";
+  cargarContextoUsuario,
+  autorizarRoles,
+} from "../middlewares/autorizacion.middleware.js";
+import {
+  validarBody,
+  validarParametros,
+} from "../middlewares/validacion.middleware.js";
+import {
+  crearPabellonSchema,
+  actualizarPabellonSchema,
+  pabellonIdParamSchema,
+} from "../validators/pabellon.schema.js";
 
 const router = Router();
 
+const soloAdmin = [
+  autenticarUsuario,
+  cargarContextoUsuario,
+  autorizarRoles("ADMINISTRADOR"),
+];
+
+// Rutas Públicas (Lectura)
 router.get("/", obtenerTodos);
+router.get("/:id", validarParametros(pabellonIdParamSchema), obtenerPorId);
 
-router.get("/:id", validarId, obtenerPorId);
-
+// Rutas Protegidas (Gestión Administrativa)
 router.post(
-    "/",
-    validarSchema(crearPabellonSchema),
-    crear
+  "/",
+  ...soloAdmin,
+  validarBody(crearPabellonSchema),
+  crear
 );
 
 router.put(
-    "/:id",
-    validarId,
-    validarSchema(actualizarPabellonSchema),
-    actualizar
+  "/:id",
+  ...soloAdmin,
+  validarParametros(pabellonIdParamSchema),
+  validarBody(actualizarPabellonSchema),
+  actualizar
 );
 
-router.delete("/:id", validarId, eliminar);
+router.delete(
+  "/:id",
+  ...soloAdmin,
+  validarParametros(pabellonIdParamSchema),
+  eliminar
+);
 
 export default router;
