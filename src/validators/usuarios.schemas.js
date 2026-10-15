@@ -36,6 +36,22 @@ export const crearAdministradorSchema = z
       .number({ required_error: "La localidad es obligatoria." })
       .int()
       .positive("El ID de localidad debe ser un entero positivo."),
+    apellido: z
+      .string({ required_error: "El apellido es obligatorio." })
+      .trim()
+      .min(2, "El apellido debe tener al menos 2 caracteres."),
+    sexo: z
+      .enum(["M", "F"], {
+        required_error: "El sexo es obligatorio.",  
+      }),
+    cuil: z
+      .string({ required_error: "El CUIL es obligatorio." })
+      .trim()
+      .regex(/^\d{2}-\d{8}-\d$/, "El CUIL debe tener el formato XX-XXXXXXXX-X."),
+    fecaDeNacimiento: z
+      .string({ required_error: "La fecha de nacimiento es obligatoria." })
+      .trim(),
+    
   })
   .strict();
 

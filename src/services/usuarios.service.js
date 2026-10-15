@@ -38,7 +38,21 @@ const proyeccionUsuario = {
 };
 
 export const crearAdministrador = async (dto) => {
-  const { nombre, email, password, localidadId } = dto;
+  const { nombre, email, password, localidadId, apellido, sexo, cuil, fecaDeNacimiento } = dto;
+
+  const emailExistente = await prisma.usuario.findUnique({
+    where: { email },
+  }); 
+    if (emailExistente) {
+    throw crearError("Ya existe un usuario con el email proporcionado.", 400);
+  }
+  
+  const usuarioExistente = await prisma.usuario.findUnique({
+    where: { cuil },
+  });
+  if (usuarioExistente) {
+    throw crearError("Ya existe un usuario con el CUIL proporcionado.", 400);
+  }
 
   const localidadExiste = await prisma.localidad.findUnique({
     where: { id: localidadId },
