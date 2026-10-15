@@ -3,38 +3,64 @@ import { Router } from "express";
 import {
     obtenerTodos,
     obtenerPorId,
-    crear,
     actualizar,
     eliminar
 } from "../controllers/emprendimiento.controller.js";
 
 import {
-    crearEmprendimientoSchema,
-    actualizarEmprendimientoSchema
+    consultarEmprendimientosSchema,
+    actualizarEmprendimientoSchema,
+    emprendimientoIdParamSchema,
 } from "../validators/emprendimiento.schema.js";
 
-import { validarSchema } from "../middlewares/validarSchema.js";
-import { validarId } from "../middlewares/validarId.js";
+import {
+    validarBody,
+    validarParametros,
+    validarConsulta,
+}from "../middlewares/validacion.middleware.js";   
+
+import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
+
+import {
+    cargarContextoUsuario,
+    autorizarRoles,
+} from "../middlewares/autorizacion.middleware.js";
 
 const router = Router();
 
-router.get("/", obtenerTodos);
+const soloAdmin = [
+    autenticarUsuario,
+    cargarContextoUsuario,
+    autorizarRoles("ADMINISTRADOR"),
+];
 
-router.get("/:id", validarId, obtenerPorId);
+const artesanoOAdmin = [
+    autenticarUsuario,
+    cargarContextoUsuario,
+    autorizarRoles("ARTESANO", "ADMINISTRADOR"),
+];
+//lecura publica
+router.get("/", validarConsulta(consultarEmprendimientosSchema), obtenerTodos);
 
-router.post(
+router.get("/:id", validarParametros (emprendimientoIdParamSchema), obtenerPorId);
+//Creacion Administrativa
+/*router.post(
     "/",
-    validarSchema(crearEmprendimientoSchema),
+    ...soloAdmin,
+    validarBody(crearEmprendimientoSchema),
     crear
-);
+);*/
 
-router.put(
+//Actualizacion del propietario o de un administrador
+router.patch(
     "/:id",
-    validarId,
-    validarSchema(actualizarEmprendimientoSchema),
+    ...artesanoOAdmin,
+    validarParametros(emprendimientoIdParamSchema),
+    validarBody(actualizarEmprendimientoSchema),
     actualizar
-);
+)
 
-router.delete("/:id", validarId, eliminar);
+// Eliminacion Administrativa
+router.delete("/:id",...soloAdmin,validarParametros(emprendimientoIdParamSchema), eliminar);
 
 export default router;
