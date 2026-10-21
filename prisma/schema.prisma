@@ -16,24 +16,47 @@ model Pabellon{
   id         Int      @id @default(autoincrement())
   nombre     String   
   descripcion String?
+
+  sectores   Sector[]
 }
 
 model Sector{
   id        Int      @id @default(autoincrement())
   nombre     String   
   descripcion String?
+
+  pabellonId  Int
+  pabellon    Pabellon @relation(fields: [pabellonId], references: [id], onDelete: Restrict)
+
+  stands     Stand[]
 }
 
 model Stand{
   id        Int      @id @default(autoincrement())
   nombre    String   
   estado    String   @default("Disponible")
+
+  sectorId  Int
+  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+
+  emprendimiento Emprendimiento?
 }
 
 model Emprendimiento{
-  id        Int      @id @default(autoincrement())
-  nombre    String   
-  descripcion String?
+  id            Int      @id @default(autoincrement())
+  nombre        String   
+  descripcion   String?
+
+  usuarioId     String @unique @db.Uuid
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  standId       Int?     @unique
+  stand         Stand?   @relation(fields: [standId], references: [id], onDelete: SetNull)
+
+  rubroId         Int?
+  rubro           Rubro?      @relation(fields: [rubroId], references: [id], onDelete: SetNull)
+
+  productos     Producto[]
 }
 
 model Producto{
@@ -41,11 +64,123 @@ model Producto{
   nombre String
   descripcion String?
   precio Decimal @db.Decimal(10, 2)
-  stock Int @default(0)
+  
+  emprendimientoId Int
+  emprendimiento   Emprendimiento @relation(fields: [emprendimientoId], references: [id], onDelete: Cascade)
 }
 
 model Rubro{
   id        Int      @id @default(autoincrement())
   nombre     String  @unique 
   descripcion String?
+
+  emprendimientos Emprendimiento[]
+}
+
+// Axel
+model Usuario {
+  id              String     @id @default(uuid()) @db.Uuid
+  nombre          String
+  apellido        String
+  cuil            String     @unique
+  fechaNacimiento DateTime
+  sexo            String
+
+  localidadId     BigInt
+  
+  emprendimiento  Emprendimiento? 
+
+  // Datos de usuario
+  email           String     @unique
+  passwordHash    String
+
+  activo          Boolean   @default(true)
+  ultimoAcceso    DateTime?
+
+  localidad       Localidad       @relation(fields: [localidadId], references: [id], onDelete: Restrict)
+  
+  inscripciones   Inscripcion[]   @relation("Realiza")
+  evaluaciones    Inscripcion[]   @relation("Evalua")
+
+  roles           UsuarioRol[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Rol {
+  id        Int            @id  @default(autoincrement())
+  nombre    String         @unique
+
+  usuarios  UsuarioRol[]
+}
+
+model UsuarioRol {
+  usuarioId String  @db.Uuid
+  rolId     Int
+
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Restrict)
+
+  @@id([usuarioId, rolId])
+}
+
+model Inscripcion {
+  id                String     @id        @default(uuid()) @db.Uuid
+  nroTramite        Int        @unique    @default(autoincrement())
+
+  nroEdicion        Int
+
+  usuarioId         String     @db.Uuid
+  usuario           Usuario    @relation("Realiza", fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  evaluadorId       String?    @db.Uuid
+  evaluador         Usuario?   @relation("Evalua", fields: [evaluadorId], references: [id], onDelete: SetNull)
+
+  estadoId          Int
+  estado            Estado   @relation(fields: [estadoId], references: [id], onDelete: Restrict)
+
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Estado {
+  id              Int           @id       @default(autoincrement())
+  nombre          String        @unique
+
+  inscripciones     Inscripcion[]
+}
+
+model Provincia {
+  id        Int      @id
+  nombre    String   @unique
+
+  departamentos Departamento[]
+}
+
+model Departamento {
+  id        Int      @id
+  nombre    String
+
+  provinciaId Int
+  provincia   Provincia @relation(fields: [provinciaId], references: [id], onDelete: Restrict)
+
+  localidades Localidad[]
+}
+
+model Localidad {
+  id        BigInt      @id
+  nombre    String
+
+  departamentoId Int
+  departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
+
+  usuarios  Usuario[]
+}
+
+model TokenRevocado {
+  jti     String   @id
+  venceEn DateTime
+
+  @@index([venceEn])
 }
