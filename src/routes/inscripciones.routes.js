@@ -4,11 +4,9 @@ import {
   consultarInscripciones,
   cambiarEstadoInscripcion,
 } from "../controllers/inscripciones.controller.js";
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
-import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
+
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
   validarBody,
   validarConsulta,
@@ -23,19 +21,14 @@ import {
 
 const router = express.Router();
 
-const evaluadoresOAdmin = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR", "EVALUADOR"),
-];
 
 // 1. Postulación pública (abierta a postulantes)
 router.post("/postularse", validarBody(postularseSchema), postularse);
 
-// 2. Consulta de trámites (requiere rol ADMINISTRADOR o EVALUADOR)
+// 2. Consulta de trámites (requiere rol Administrador)
 router.get(
   "/",
-  ...evaluadoresOAdmin,
+  ...soloAdmin(),
   validarConsulta(consultarInscripcionesSchema),
   consultarInscripciones
 );
@@ -43,7 +36,7 @@ router.get(
 // 3. Evaluar trámite (cambiar estado y opcionalmente asignar/liberar stand)
 router.patch(
   "/:id/estado",
-  ...evaluadoresOAdmin,
+  ...soloAdmin(),
   validarParametros(inscripcionIdParamSchema),
   validarBody(cambiarEstadoSchema),
   cambiarEstadoInscripcion
