@@ -7,11 +7,6 @@ import {
   actualizarProducto,
   eliminarProducto,
 } from "../controllers/productos.controller.js";
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
-import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
 
 import { soloArtesano } from "../middlewares/soloArtesano.js";
 

@@ -38,13 +38,6 @@ import { cerrarSesion } from "../controllers/sesiones.controller.js";
 
 const router = express.Router();
 
-// Middleware compuesto: solo usuarios autenticados con rol ADMINISTRADOR
-// const controlAdministrador = [
-//   autenticarUsuario,
-//   cargarContextoUsuario,
-//   autorizarRoles("Administrador"),
-// ];
-
 // 1. Ruta pública de acceso
 router.post("/login", validarBody(iniciarSesionSchema), iniciarSesion);
 router.post("/logout", autenticarUsuario, cerrarSesion);

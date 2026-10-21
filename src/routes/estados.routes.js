@@ -6,11 +6,9 @@ import {
   actualizarEstado,
   eliminarEstado,
 } from "../controllers/estados.controller.js";
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
-import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
+
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
   validarBody,
   validarParametros,
@@ -23,16 +21,12 @@ import {
 
 const router = express.Router();
 
-const soloAdmin = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR"),
-];
 
-router.get("/", ...soloAdmin, listarEstados);
-router.get("/:id", ...soloAdmin, validarParametros(estadoIdParamSchema), obtenerEstado);
-router.post("/", ...soloAdmin, validarBody(crearEstadoSchema), crearEstado);
-router.put("/:id", ...soloAdmin, validarParametros(estadoIdParamSchema), validarBody(actualizarEstadoSchema), actualizarEstado);
-router.delete("/:id", ...soloAdmin, validarParametros(estadoIdParamSchema), eliminarEstado);
+
+router.get("/", ...soloAdmin(), listarEstados);
+router.get("/:id", ...soloAdmin(), validarParametros(estadoIdParamSchema), obtenerEstado);
+router.post("/", ...soloAdmin(), validarBody(crearEstadoSchema), crearEstado);
+router.put("/:id", ...soloAdmin(), validarParametros(estadoIdParamSchema), validarBody(actualizarEstadoSchema), actualizarEstado);
+router.delete("/:id", ...soloAdmin(), validarParametros(estadoIdParamSchema), eliminarEstado);
 
 export default router;
