@@ -6,11 +6,9 @@ import {
   actualizar,
   eliminar,
 } from "../controllers/pabellon.controller.js";
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
-import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
+
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
   validarBody,
   validarParametros,
@@ -23,11 +21,6 @@ import {
 
 const router = Router();
 
-const soloAdmin = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR"),
-];
 
 // Rutas Públicas (Lectura)
 router.get("/", obtenerTodos);
@@ -36,14 +29,14 @@ router.get("/:id", validarParametros(pabellonIdParamSchema), obtenerPorId);
 // Rutas Protegidas (Gestión Administrativa)
 router.post(
   "/",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarBody(crearPabellonSchema),
   crear
 );
 
 router.put(
   "/:id",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarParametros(pabellonIdParamSchema),
   validarBody(actualizarPabellonSchema),
   actualizar
@@ -51,7 +44,7 @@ router.put(
 
 router.delete(
   "/:id",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarParametros(pabellonIdParamSchema),
   eliminar
 );

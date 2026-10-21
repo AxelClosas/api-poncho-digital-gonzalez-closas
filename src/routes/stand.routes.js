@@ -7,12 +7,8 @@ import {
   eliminar,
 } from "../controllers/stand.controller.js";
 
-// Importamos los middlewares centrales
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
-import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
   validarBody,
   validarParametros,
@@ -27,12 +23,6 @@ import {
 
 const router = Router();
 
-// Middleware compuesto: solo usuarios autenticados con rol ADMINISTRADOR
-const soloAdmin = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR"),
-];
 
 // Rutas Públicas (Lectura)
 router.get("/", obtenerTodos);
@@ -41,14 +31,14 @@ router.get("/:id", validarParametros(standIdParamSchema), obtenerPorId);
 // Rutas Protegidas (Gestión)
 router.post(
   "/",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarBody(crearStandSchema),
   crear
 );
 
 router.put(
   "/:id",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarParametros(standIdParamSchema),
   validarBody(actualizarStandSchema),
   actualizar
@@ -56,7 +46,7 @@ router.put(
 
 router.delete(
   "/:id",
-  ...soloAdmin,
+  ...soloAdmin(),
   validarParametros(standIdParamSchema),
   eliminar
 );
