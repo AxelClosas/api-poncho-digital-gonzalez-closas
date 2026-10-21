@@ -123,12 +123,12 @@ export const iniciarSesion = async (dto) => {
     throw crearError("Las credenciales son inválidas.", 401);
   }
 
-  // if (!usuario.activo) {
-  //   throw crearError(
-  //     "Tu cuenta se encuentra inactiva o tu postulación está pendiente de revisión.",
-  //     403
-  //   );
-  // }
+  if (!usuario.activo) {
+    throw crearError(
+      "Tu cuenta se encuentra inactiva o tu postulación está pendiente de revisión.",
+      401
+    );
+  }
 
   await prisma.usuario.update({
     where: { id: usuario.id },
