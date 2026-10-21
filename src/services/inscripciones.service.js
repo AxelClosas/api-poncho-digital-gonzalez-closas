@@ -34,10 +34,11 @@ export const postularse = async (datos) => {
 
   // 3. Obtenemos el estado inicial ("nuevo")
   const estadoNuevo = await prisma.estado.findFirst({
-    where: { nombre: "nuevo" },
+    where: { nombre: { contains: "nuevo", mode: "insensitive" } }
   });
+
   if (!estadoNuevo) {
-    throw crearError("El estado inicial 'nuevo' no está configurado en el sistema.", 500);
+    throw crearError("El estado inicial 'nuevo' no está configurado en el sistema.", 404);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -241,6 +242,10 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
       throw crearError(`Inscripción con ID ${id} no encontrada.`, 404);
     }
 
+    if (inscripcion.estadoId === estadoId) {
+      throw crearError("El estado indicado es el mismo que el actual.", 409);
+    }
+
     const nuevoEstado = await tx.estado.findUnique({
       where: { id: estadoId },
     });
@@ -260,7 +265,14 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
 
       // Si el estado es "aprobado", se le asigna el rol ARTESANO si no lo tiene
       if (nombreEstadoLower === "aprobado") {
-        const rolArtesano = await tx.rol.findFirst({ where: { nombre: "ARTESANO" } });
+        const rolArtesano = await tx.rol.findFirst({
+          where: {
+            nombre: {
+              contains: "ARTESANO", mode: "insensitive"
+            }
+          }
+        });
+
         if (rolArtesano) {
           await tx.usuarioRol.upsert({
             where: {
