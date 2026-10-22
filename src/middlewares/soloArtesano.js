@@ -4,4 +4,4 @@ import {
   autorizarRoles,
 } from "../middlewares/autorizacion.middleware.js";
 
-export const soloArtesano = () => [ autenticarUsuario, cargarContextoUsuario, autorizarRoles("Artesano") ]
+export const soloArtesano = () => [ autenticarUsuario, cargarContextoUsuario, autorizarRoles("ARTESANO") ]

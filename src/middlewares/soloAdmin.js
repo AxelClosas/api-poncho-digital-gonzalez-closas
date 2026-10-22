@@ -4,4 +4,4 @@ import {
   autorizarRoles,
 } from "../middlewares/autorizacion.middleware.js";
 
-export const soloAdmin = () => [ autenticarUsuario, cargarContextoUsuario, autorizarRoles("Administrador") ]
+export const soloAdmin = () => [ autenticarUsuario, cargarContextoUsuario, autorizarRoles("ADMINISTRADOR") ]
