@@ -5,6 +5,10 @@ import { crearError } from "../utils/errores.js";
 const proyeccionUsuario = {
   id: true,
   nombre: true,
+  apellido: true,
+  cuil: true,
+  fechaNacimiento: true,
+  sexo: true,
   email: true,
   activo: true,
   ultimoAcceso: true,
@@ -38,15 +42,24 @@ const proyeccionUsuario = {
 };
 
 export const crearAdministrador = async (dto) => {
-  const { nombre, email, password, localidadId, apellido, sexo, cuil, fecaDeNacimiento } = dto;
+  const {
+    nombre,
+    apellido,
+    email,
+    password,
+    cuil,
+    sexo,
+    fechaNacimiento,
+    localidadId,
+  } = dto;
 
   const emailExistente = await prisma.usuario.findUnique({
     where: { email },
-  }); 
-    if (emailExistente) {
+  });
+  if (emailExistente) {
     throw crearError("Ya existe un usuario con el email proporcionado.", 400);
   }
-  
+
   const usuarioExistente = await prisma.usuario.findUnique({
     where: { cuil },
   });
@@ -73,10 +86,14 @@ export const crearAdministrador = async (dto) => {
   return prisma.usuario.create({
     data: {
       nombre,
+      apellido,
+      cuil,
+      sexo,
+      fechaNacimiento,
       email,
       passwordHash,
       localidadId,
-      activo: true, // El administrador creado explícitamente nace habilitado
+      activo: true,
       roles: {
         create: {
           rol: { connect: { id: rolAdmin.id } },
@@ -108,20 +125,20 @@ export const iniciarSesion = async (dto) => {
 
   if (!usuario.activo) {
     throw crearError(
-      "Tu cuenta se encuentra inactiva o tu postulación aún está pendiente de revisión.",
-      403
+      "Tu cuenta se encuentra inactiva o tu postulación está pendiente de revisión.",
+      401
     );
   }
 
-  // Registrar último acceso
   await prisma.usuario.update({
     where: { id: usuario.id },
-    data: { ultimoAcceso: new Date() },
+    data: { ultimoAcceso: new Date(), activo: true },
   });
 
   return {
     id: usuario.id,
     nombre: usuario.nombre,
+    apellido: usuario.apellido,
     email: usuario.email,
     roles: usuario.roles.map((r) => r.rol.nombre),
   };
@@ -138,7 +155,9 @@ export const consultarUsuarios = async (criterios) => {
   if (busqueda) {
     where.OR = [
       { nombre: { contains: busqueda, mode: "insensitive" } },
+      { apellido: { contains: busqueda, mode: "insensitive" } },
       { email: { contains: busqueda, mode: "insensitive" } },
+      { cuil: { contains: busqueda } },
     ];
   }
 
@@ -222,7 +241,7 @@ export const cambiarEstadoActivo = async (usuarioId, nuevoEstadoActivo) => {
     return tx.usuario.update({
       where: { id: usuarioId },
       data: { activo: nuevoEstadoActivo },
-      select: { id: true, nombre: true, email: true, activo: true },
+      select: { id: true, nombre: true, apellido: true, email: true, activo: true },
     });
   });
 };
@@ -267,12 +286,10 @@ export const retirarRolDeUsuario = async (usuarioId, nombreRol) => {
       throw crearError(`El usuario no tiene asignado el rol ${nombreRol}.`, 400);
     }
 
-    // Un usuario no puede quedarse sin ningún rol
     if (usuario.roles.length === 1) {
       throw crearError("El usuario debe conservar al menos un rol.", 409);
     }
 
-    // Regla de seguridad: no retirar el rol al último administrador activo
     if (nombreRol === "ADMINISTRADOR" && usuario.activo) {
       const otrosAdmins = await tx.usuario.count({
         where: {

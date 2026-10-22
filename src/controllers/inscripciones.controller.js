@@ -20,7 +20,7 @@ export const consultarInscripciones = async (req, res, next) => {
 
 export const cambiarEstadoInscripcion = async (req, res, next) => {
   try {
-    const evaluadorId = req.usuario?.id; // Proviene del middleware de autenticación (req.usuario)
+    const evaluadorId = req.usuario?.id; // Inyectado por autenticarUsuario
     const inscripcion = await inscripcionesService.cambiarEstadoInscripcion(
       req.parametrosValidados.id,
       req.bodyValidado,

@@ -9,11 +9,15 @@ import {
   agregarRol,
   eliminarRol,
 } from "../controllers/usuarios.controller.js";
+
 import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
 import {
   cargarContextoUsuario,
   autorizarRoles,
 } from "../middlewares/autorizacion.middleware.js";
+
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
   validarBody,
   validarConsulta,
@@ -29,62 +33,66 @@ import {
   rolParamSchema,
 } from "../validators/usuarios.schemas.js";
 
-const router = express.Router();
+import { cerrarSesion } from "../controllers/sesiones.controller.js";
 
-// Middleware compuesto: solo usuarios autenticados con rol ADMINISTRADOR
-const controlAdministrador = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR"),
-];
+
+const router = express.Router();
 
 // 1. Ruta pública de acceso
 router.post("/login", validarBody(iniciarSesionSchema), iniciarSesion);
+router.post("/logout", autenticarUsuario, cerrarSesion);
 
 // 2. Ruta para obtener el perfil propio del usuario autenticado
 router.get("/me", autenticarUsuario, cargarContextoUsuario, obtenerMiPerfil);
 
 // 3. Rutas protegidas exclusivas de Administración
+// Crear ADMIN
 router.post(
   "/administradores",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarBody(crearAdministradorSchema),
   crearAdministrador
 );
 
+// CONSULTAR USUARIOS
 router.get(
   "/",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarConsulta(consultarUsuariosSchema),
   consultarUsuarios
 );
 
+// OBTENER USUARIO POR ID
 router.get(
   "/:id",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarParametros(usuarioIdParamSchema),
   obtenerUsuarioPorId
 );
 
+// CAMBIAR ESTADO ACTIVO - ACTIVAR CUENTA DE USUARIO
 router.patch(
   "/:id/activo",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarParametros(usuarioIdParamSchema),
   validarBody(cambiarActivoSchema),
   cambiarEstadoActivo
 );
 
+// ASIGNAR NUEVO ROL A USUARIO
 router.post(
   "/:id/roles",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarParametros(usuarioIdParamSchema),
   validarBody(asignarRolSchema),
   agregarRol
 );
 
+// ELIMINAR ROL DE USUARIO
+// TODO: Cambiar id autoincremental de roles por UUID y actualizar la ruta para que sea más RESTful: /usuarios/:id/roles/:rolId
 router.delete(
   "/:id/roles/:rol",
-  ...controlAdministrador,
+  ...soloAdmin(),
   validarParametros(rolParamSchema),
   eliminarRol
 );

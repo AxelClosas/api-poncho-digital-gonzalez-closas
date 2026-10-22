@@ -1,12 +1,22 @@
-import crypto from "node:crypto";
 import bcrypt from "bcrypt";
 import prisma from "../config/prisma.js";
 import { crearError } from "../utils/errores.js";
 
 export const postularse = async (datos) => {
-  const { nombre, apellido, cuil, fechaNacimiento, sexo, email, password, localidadId, emprendimiento, nroEdicion } = datos;
+  const {
+    nombre,
+    apellido,
+    cuil,
+    fechaNacimiento,
+    sexo,
+    email,
+    password,
+    localidadId,
+    emprendimiento,
+    nroEdicion,
+  } = datos;
 
-  // Verificamos que la localidad exista en la base de datos
+  // 1. Verificamos que la localidad exista en la base de datos (con tipo BigInt)
   const localidadExiste = await prisma.localidad.findUnique({
     where: { id: localidadId },
   });
@@ -14,7 +24,7 @@ export const postularse = async (datos) => {
     throw crearError("La localidad seleccionada no existe.", 400);
   }
 
-  // Verificamos que el rubro exista
+  // 2. Verificamos que el rubro exista
   const rubroExiste = await prisma.rubro.findUnique({
     where: { id: emprendimiento.rubroId },
   });
@@ -22,12 +32,13 @@ export const postularse = async (datos) => {
     throw crearError("El rubro indicado no existe.", 400);
   }
 
-  // Obtenemos el estado inicial ("nuevo")
+  // 3. Obtenemos el estado inicial ("nuevo")
   const estadoNuevo = await prisma.estado.findFirst({
-    where: { nombre: "nuevo" },
+    where: { nombre: { contains: "nuevo", mode: "insensitive" } }
   });
+
   if (!estadoNuevo) {
-    throw crearError("El estado inicial 'nuevo' no está configurado en el sistema.", 500);
+    throw crearError("El estado inicial 'nuevo' no está configurado en el sistema.", 404);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -38,8 +49,15 @@ export const postularse = async (datos) => {
 
     let esUsuarioNuevo = false;
 
-    // 1. Si no existe, creamos el usuario inactivo con contraseña aleatoria hasheada
+    // 4. Si el usuario no existe, verificamos CUIL único y lo creamos
     if (!usuario) {
+      const cuilExistente = await tx.usuario.findUnique({
+        where: { cuil },
+      });
+      if (cuilExistente) {
+        throw crearError("Ya existe un usuario registrado con el CUIL proporcionado.", 409);
+      }
+
       esUsuarioNuevo = true;
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -53,15 +71,23 @@ export const postularse = async (datos) => {
           email,
           localidadId,
           passwordHash,
-          activo: false, // Inactivo hasta que sea aprobado o el admin solicite cambios
+          activo: false, // Inactivo hasta que un evaluador lo apruebe o solicite cambios
         },
       });
     }
 
-    // 2. Manejo del Emprendimiento
+    // 5. Manejo del Emprendimiento (Crear o Actualizar datos provistos)
     let emprendimientoId;
     if (usuario.emprendimiento) {
-      emprendimientoId = usuario.emprendimiento.id;
+      const emprendimientoActualizado = await tx.emprendimiento.update({
+        where: { id: usuario.emprendimiento.id },
+        data: {
+          nombre: emprendimiento.nombre,
+          descripcion: emprendimiento.descripcion ?? null,
+          rubroId: emprendimiento.rubroId,
+        },
+      });
+      emprendimientoId = emprendimientoActualizado.id;
     } else {
       const nuevoEmprendimiento = await tx.emprendimiento.create({
         data: {
@@ -74,7 +100,7 @@ export const postularse = async (datos) => {
       emprendimientoId = nuevoEmprendimiento.id;
     }
 
-    // 3. Verificamos si ya tiene una inscripción para esta edición
+    // 6. Verificamos que no exista duplicidad de trámite para la misma edición
     const inscripcionExistente = await tx.inscripcion.findFirst({
       where: {
         usuarioId: usuario.id,
@@ -86,7 +112,7 @@ export const postularse = async (datos) => {
       throw crearError(`Ya existe una inscripción registrada para este usuario en la edición ${nroEdicion}.`, 409);
     }
 
-    // 4. Creamos la inscripción
+    // 7. Creamos la inscripción con estado inicial "nuevo"
     const inscripcion = await tx.inscripcion.create({
       data: {
         nroEdicion,
@@ -99,9 +125,19 @@ export const postularse = async (datos) => {
           select: {
             id: true,
             nombre: true,
+            apellido: true,
+            cuil: true,
             email: true,
-            localidad: { select: { nombre: true, departamento: { select: { nombre: true } } } },
-            emprendimiento: true,
+            localidad: {
+              select: {
+                id: true,
+                nombre: true,
+                departamento: { select: { nombre: true } },
+              },
+            },
+            emprendimiento: {
+              include: { rubro: true },
+            },
           },
         },
       },
@@ -109,7 +145,7 @@ export const postularse = async (datos) => {
 
     return {
       mensaje: esUsuarioNuevo
-        ? "Postulación registrada con éxito. Su cuenta se encuentra pendiente de revisión y será activada cuando sea evaluada."
+        ? "Postulación registrada con éxito. Su cuenta se encuentra pendiente de revisión."
         : "Postulación registrada con éxito para su usuario existente.",
       inscripcion,
     };
@@ -127,7 +163,9 @@ export const consultarInscripciones = async (criterios) => {
   if (busqueda) {
     where.OR = [
       { usuario: { nombre: { contains: busqueda, mode: "insensitive" } } },
+      { usuario: { apellido: { contains: busqueda, mode: "insensitive" } } },
       { usuario: { email: { contains: busqueda, mode: "insensitive" } } },
+      { usuario: { cuil: { contains: busqueda } } },
       { usuario: { emprendimiento: { nombre: { contains: busqueda, mode: "insensitive" } } } },
     ];
   }
@@ -142,14 +180,20 @@ export const consultarInscripciones = async (criterios) => {
       take: limite,
       include: {
         estado: true,
+        evaluador: {
+          select: { id: true, nombre: true, apellido: true, email: true },
+        },
         usuario: {
           select: {
             id: true,
             nombre: true,
+            apellido: true,
+            cuil: true,
             email: true,
             activo: true,
             localidad: {
               select: {
+                id: true,
                 nombre: true,
                 departamento: {
                   select: {
@@ -198,6 +242,10 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
       throw crearError(`Inscripción con ID ${id} no encontrada.`, 404);
     }
 
+    if (inscripcion.estadoId === estadoId) {
+      throw crearError("El estado indicado es el mismo que el actual.", 409);
+    }
+
     const nuevoEstado = await tx.estado.findUnique({
       where: { id: estadoId },
     });
@@ -206,38 +254,96 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
       throw crearError("El estado indicado no existe.", 400);
     }
 
+    const nombreEstadoLower = nuevoEstado.nombre.toLowerCase();
+
     // Si se pasa a aprobado o solicitud de cambio, activamos la cuenta del usuario
-    if (["aprobado", "solicitud de cambio"].includes(nuevoEstado.nombre.toLowerCase())) {
+    if (["aprobado", "solicitud de cambio"].includes(nombreEstadoLower)) {
       await tx.usuario.update({
         where: { id: inscripcion.usuarioId },
         data: { activo: true },
       });
+
       // Si el estado es "aprobado", se le asigna el rol ARTESANO si no lo tiene
-      const rolArtesano = await tx.rol.findFirst({ where: { nombre: "ARTESANO" } });
-      if (rolArtesano && nuevoEstado.nombre.toLowerCase() === "aprobado") {
-        await tx.usuarioRol.upsert({
+      if (nombreEstadoLower === "aprobado") {
+        const rolArtesano = await tx.rol.findFirst({
           where: {
-            usuarioId_rolId: { usuarioId: inscripcion.usuarioId, rolId: rolArtesano.id },
-          },
-          update: {},
-          create: { usuarioId: inscripcion.usuarioId, rolId: rolArtesano.id },
+            nombre: {
+              contains: "ARTESANO", mode: "insensitive"
+            }
+          }
+        });
+
+        if (rolArtesano) {
+          await tx.usuarioRol.upsert({
+            where: {
+              usuarioId_rolId: { usuarioId: inscripcion.usuarioId, rolId: rolArtesano.id },
+            },
+            update: {},
+            create: { usuarioId: inscripcion.usuarioId, rolId: rolArtesano.id },
+          });
+        }
+      }
+    }
+
+    // Si se pasa a rechazado, se desactiva la cuenta si no tiene otras postulaciones aprobadas
+    if (nombreEstadoLower === "rechazado") {
+      const otrasAprobadas = await tx.inscripcion.count({
+        where: {
+          usuarioId: inscripcion.usuarioId,
+          id: { not: id },
+          estado: { nombre: "aprobado" },
+        },
+      });
+
+      if (otrasAprobadas === 0) {
+        await tx.usuario.update({
+          where: { id: inscripcion.usuarioId },
+          data: { activo: false },
         });
       }
     }
 
-    // Si se asigna un stand al aprobar
-    if (standId && inscripcion.usuario.emprendimiento) {
-      const stand = await tx.stand.findUnique({ where: { id: standId } });
-      if (!stand) throw crearError("El stand indicado no existe.", 400);
+    // Manejo de asignación o liberación de Stand
+    if (inscripcion.usuario.emprendimiento) {
+      const standActualId = inscripcion.usuario.emprendimiento.standId;
 
-      await tx.emprendimiento.update({
-        where: { id: inscripcion.usuario.emprendimiento.id },
-        data: { standId },
-      });
-      await tx.stand.update({
-        where: { id: standId },
-        data: { estado: "Ocupado" },
-      });
+      // Si se envía un nuevo standId
+      if (standId) {
+        const stand = await tx.stand.findUnique({ where: { id: standId } });
+        if (!stand) throw crearError("El stand indicado no existe.", 400);
+
+        if (stand.estado !== "Disponible" && stand.id !== standActualId) {
+          throw crearError("El stand seleccionado no se encuentra disponible.", 409);
+        }
+
+        // Si ya tenía otro stand previamente, liberamos el viejo
+        if (standActualId && standActualId !== standId) {
+          await tx.stand.update({
+            where: { id: standActualId },
+            data: { estado: "Disponible" },
+          });
+        }
+
+        // Asignamos el nuevo y lo ocupamos
+        await tx.emprendimiento.update({
+          where: { id: inscripcion.usuario.emprendimiento.id },
+          data: { standId },
+        });
+        await tx.stand.update({
+          where: { id: standId },
+          data: { estado: "Ocupado" },
+        });
+      } else if (standId === null && standActualId) {
+        // Si se envió standId: null explícito, se libera el stand
+        await tx.emprendimiento.update({
+          where: { id: inscripcion.usuario.emprendimiento.id },
+          data: { standId: null },
+        });
+        await tx.stand.update({
+          where: { id: standActualId },
+          data: { estado: "Disponible" },
+        });
+      }
     }
 
     return tx.inscripcion.update({
@@ -248,7 +354,7 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
       },
       include: {
         estado: true,
-        evaluador: { select: { id: true, nombre: true, email: true } },
+        evaluador: { select: { id: true, nombre: true, apellido: true, email: true } },
       },
     });
   });

@@ -1,6 +1,11 @@
 # api-poncho-digital-gonzalez-closas
 API REST Poncho Digital. Laboratorio Desarrollo Backend.
 
+## Roles del sistema
+
+El sistema utiliza únicamente los roles `ADMINISTRADOR` y `ARTESANO`.
+La evaluación de inscripciones corresponde al administrador.
+
 ## Consulta de emprendimientos
 
 `GET /api/emprendimientos` es público y devuelve `{ emprendimientos, paginacion }`.

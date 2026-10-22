@@ -13,7 +13,7 @@ datasource db {
 }
 
 model Pabellon{
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(uuid()) @db.Uuid
   nombre     String   
   descripcion String?
 
@@ -21,36 +21,36 @@ model Pabellon{
 }
 
 model Sector{
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid()) @db.Uuid
   nombre     String   
   descripcion String?
 
-  pabellonId  Int
+  pabellonId  String @db.Uuid
   pabellon    Pabellon @relation(fields: [pabellonId], references: [id], onDelete: Restrict)
 
   stands     Stand[]
 }
 
 model Stand{
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid()) @db.Uuid
   nombre    String   
   estado    String   @default("Disponible")
 
-  sectorId  Int
+  sectorId  String @db.Uuid
   sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
 
   emprendimiento Emprendimiento?
 }
 
 model Emprendimiento{
-  id            Int      @id @default(autoincrement())
+  id            String     @id @default(uuid()) @db.Uuid
   nombre        String   
   descripcion   String?
 
   usuarioId     String @unique @db.Uuid
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
-  standId       Int?     @unique
+  standId       String?     @unique @db.Uuid
   stand         Stand?   @relation(fields: [standId], references: [id], onDelete: SetNull)
 
   rubroId         Int?
@@ -60,12 +60,12 @@ model Emprendimiento{
 }
 
 model Producto{
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid()) @db.Uuid
   nombre String
   descripcion String?
   precio Decimal @db.Decimal(10, 2)
   
-  emprendimientoId Int
+  emprendimientoId String @db.Uuid
   emprendimiento   Emprendimiento @relation(fields: [emprendimientoId], references: [id], onDelete: Cascade)
 }
 
@@ -109,7 +109,7 @@ model Usuario {
 }
 
 model Rol {
-  id        Int            @id  @default(autoincrement())
+  id        String     @id @default(uuid()) @db.Uuid
   nombre    String         @unique
 
   usuarios  UsuarioRol[]
@@ -117,7 +117,7 @@ model Rol {
 
 model UsuarioRol {
   usuarioId String  @db.Uuid
-  rolId     Int
+  rolId     String @db.Uuid
 
   usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Restrict)
@@ -176,4 +176,11 @@ model Localidad {
   departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
 
   usuarios  Usuario[]
+}
+
+model TokenRevocado {
+  jti     String   @id
+  venceEn DateTime
+
+  @@index([venceEn])
 }

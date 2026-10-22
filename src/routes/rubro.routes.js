@@ -1,4 +1,3 @@
-// src/routes/rubro.routes.js
 import { Router } from "express";
 import {
   obtenerTodos,
@@ -7,33 +6,47 @@ import {
   actualizar,
   eliminar,
 } from "../controllers/rubro.controller.js";
-import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
+
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import {
-  cargarContextoUsuario,
-  autorizarRoles,
-} from "../middlewares/autorizacion.middleware.js";
-import { validarId } from "../middlewares/validarId.js";
-import { validarSchema } from "../middlewares/validarSchema.js";
+  validarBody,
+  validarParametros,
+} from "../middlewares/validacion.middleware.js";
 import {
   crearRubroSchema,
   actualizarRubroSchema,
+  rubroIdParamSchema,
 } from "../validators/rubro.schema.js";
 
 const router = Router();
 
-const soloAdmin = [
-  autenticarUsuario,
-  cargarContextoUsuario,
-  autorizarRoles("ADMINISTRADOR"),
-];
 
 // Rutas Públicas (Lectura)
 router.get("/", obtenerTodos);
-router.get("/:id", validarId, obtenerPorId);
+router.get("/:id", validarParametros(rubroIdParamSchema), obtenerPorId);
 
-// Rutas Protegidas
-router.post("/", ...soloAdmin, validarSchema(crearRubroSchema), crear);
-router.put("/:id", ...soloAdmin, validarId, validarSchema(actualizarRubroSchema), actualizar);
-router.delete("/:id", ...soloAdmin, validarId, eliminar);
+// Rutas Protegidas (Gestión Administrativa)
+router.post(
+  "/",
+  ...soloAdmin(),
+  validarBody(crearRubroSchema),
+  crear
+);
+
+router.put(
+  "/:id",
+  ...soloAdmin(),
+  validarParametros(rubroIdParamSchema),
+  validarBody(actualizarRubroSchema),
+  actualizar
+);
+
+router.delete(
+  "/:id",
+  ...soloAdmin(),
+  validarParametros(rubroIdParamSchema),
+  eliminar
+);
 
 export default router;

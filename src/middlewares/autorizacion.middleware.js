@@ -11,7 +11,7 @@ export const cargarContextoUsuario = async (req, res, next) => {
     }
 
     if (!usuario.activo) {
-      throw crearError("La cuenta de usuario se encuentra inhabilitada.", 403);
+      throw crearError("La cuenta de usuario se encuentra inhabilitada.", 403); // Preguntar si es 403 o 401
     }
 
     req.contextoUsuario = usuario;
