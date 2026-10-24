@@ -2,8 +2,36 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import prisma from "../src/config/prisma.js";
 import { crearAdministradorSchema } from "../src/validators/usuarios.schemas.js";
+import { crearRolSchema } from "../src/validators/roles.schemas.js";
+
+const inicializarRoles = async () => {
+  const roles = process.env.ROLES
+  const arrayRoles = roles.split(",")
+    .map(rol => rol.trim().toUpperCase())
+    .filter(rol => rol.length > 0);
+
+  const rolesDto = arrayRoles.map( rol => crearRolSchema.parse({ nombre: rol}) )
+
+  try {
+    console.log("Inicializando roles...")
+    await prisma.rol.createMany({
+      data: rolesDto,
+      skipDuplicates: true
+    })
+
+
+    const rolesCreados = await prisma.rol.findMany()
+    console.log("Roles inicializados:", rolesCreados)
+  } catch (error) {
+    console.error("Error al inicializar roles:", error)
+  }
+}
+
 
 try {
+  await inicializarRoles()
+
+
   const dto = crearAdministradorSchema.strict().parse({
     nombre: process.env.ADMIN_NOMBRE,
     apellido: process.env.ADMIN_APELLIDO,

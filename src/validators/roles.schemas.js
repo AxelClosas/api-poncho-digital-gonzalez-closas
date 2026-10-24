@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const rolIdParamSchema = z
   .object({
-    id: z.coerce.number().int().positive("El ID del rol debe ser un entero positivo."),
+    id: z.coerce.string().uuid("El ID del rol debe ser un UUID válido."),
   })
   .strict();
 
@@ -18,3 +18,5 @@ export const crearRolSchema = z
   .strict();
 
 export const actualizarRolSchema = crearRolSchema;
+
+export const eliminarRolSchema = crearRolSchema

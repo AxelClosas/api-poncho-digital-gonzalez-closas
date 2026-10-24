@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const productoIdParamSchema = z
   .object({
-    id: z.coerce.number().int().positive("El ID del producto debe ser un entero positivo."),
+    id: z.coerce.string().uuid("El ID del producto debe ser un UUID válido."),
   })
   .strict();
 

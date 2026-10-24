@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const usuarioIdParamSchema = z
   .object({
-    id: z.string().uuid("El ID de usuario debe ser un UUID válido."),
+    id: z.coerce.string().uuid("El ID de usuario debe ser un UUID válido."),
   })
   .strict();
 
 export const rolParamSchema = z
   .object({
-    id: z.string().uuid("El ID de usuario debe ser un UUID válido."),
-    rol: z
+    id: z.coerce.string().uuid("El ID de usuario debe ser un UUID válido."),
+    nombre: z
       .string()
       .trim()
       .min(3)
@@ -82,7 +82,7 @@ export const consultarUsuariosSchema = z.object({
     .transform((val) => BigInt(val))
     .optional(),
   ordenPor: z.enum(["nombre", "email", "createdAt"]).default("createdAt"),
-  direccion: z.enum(["asc", "desc"]).default("desc"),
+  direccion: z.enum(["asc", "desc"]).default("asc"),
   pagina: z.coerce.number().int().positive().default(1),
   limite: z.coerce.number().int().min(1).max(50).default(10),
 });
@@ -97,7 +97,7 @@ export const cambiarActivoSchema = z
 // DTO para asignar rol
 export const asignarRolSchema = z
   .object({
-    rol: z
+    nombre: z
       .string({ required_error: "El nombre del rol es obligatorio." })
       .trim()
       .min(3)
