@@ -91,9 +91,9 @@ router.post(
 // ELIMINAR ROL DE USUARIO
 // TODO: Cambiar id autoincremental de roles por UUID y actualizar la ruta para que sea más RESTful: /usuarios/:id/roles/:rolId
 router.delete(
-  "/:id/roles/:rol",
+  "/:id/roles",
   ...soloAdmin(),
-  validarParametros(rolParamSchema),
+  validarParametros(usuarioIdParamSchema),
   eliminarRol
 );
 
