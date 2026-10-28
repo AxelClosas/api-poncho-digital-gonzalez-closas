@@ -1,8 +1,9 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js"
 
 export const productoIdParamSchema = z
   .object({
-    id: z.coerce.string().uuid("El ID del producto debe ser un UUID válido."),
+    id: uuidSchema
   })
   .strict();
 
@@ -25,9 +26,9 @@ export const crearProductoSchema = z
 export const actualizarProductoSchema = crearProductoSchema.partial();
 
 export const consultarProductosSchema = z.object({
-  busqueda: z.string().trim().optional(),
-  emprendimientoId: z.coerce.number().int().positive().optional(),
-  rubroId: z.coerce.number().int().positive().optional(),
+  busqueda: z.string().lowercase().trim().optional(),
+  emprendimientoId: uuidSchema.optional(),
+  rubroId: uuidSchema.optional(),
   ordenPor: z.enum(["nombre", "precio", "id"]).default("id"),
   direccion: z.enum(["asc", "desc"]).default("asc"),
   pagina: z.coerce.number().int().positive().default(1),
