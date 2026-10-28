@@ -12,16 +12,17 @@ export const postularse = async (datos) => {
     email,
     password,
     localidadId,
-    emprendimiento,
-    nroEdicion,
+    emprendimiento    
   } = datos;
 
+  const nroEdicion = new Date().getFullYear(); // Se determina automáticamente según el año actual
+  
   // 1. Verificamos que la localidad exista en la base de datos (con tipo BigInt)
   const localidadExiste = await prisma.localidad.findUnique({
     where: { id: localidadId },
   });
   if (!localidadExiste) {
-    throw crearError("La localidad seleccionada no existe.", 400);
+    throw crearError(`La localidad con id ${localidadId} no existe.`, 400);
   }
 
   // 2. Verificamos que el rubro exista
