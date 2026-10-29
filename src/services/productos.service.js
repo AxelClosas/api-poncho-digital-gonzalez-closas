@@ -111,7 +111,9 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
   // Comprobamos existencia y pertenencia
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento: true },
+    include: { emprendimiento : {
+      select: { usuarioId: true }
+    } },
   });
 
   if (!producto) {
@@ -132,7 +134,9 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
 export const eliminarProducto = async (productoId, usuarioId) => {
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento: true },
+    include: { emprendimiento: {
+      select: { usuarioId: true }
+    } },
   });
 
   if (!producto) {
