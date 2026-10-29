@@ -1,8 +1,9 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js"
 
 export const rubroIdParamSchema = z
   .object({
-    id: z.coerce.number().int().positive("El ID del rubro debe ser un entero positivo."),
+    id: uuidSchema,
   })
   .strict();
 
