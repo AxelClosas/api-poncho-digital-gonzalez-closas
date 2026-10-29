@@ -6,6 +6,7 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  previewFeatures = ["relationJoins"] // Con esta feat se activa el uso de joins en las consultas
 }
 
 datasource db {

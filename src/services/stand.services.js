@@ -3,7 +3,20 @@ import { crearError } from "../utils/errores.js";
 
 export const obtenerStands = async () => {
   return await prisma.stand.findMany({
-    include: { sector: true }, // Incluye la info del sector al que pertenece
+    select: {      
+      nombre: true,
+
+      sector: {
+        select: {
+          nombre: true,
+          pabellon: {
+            select: {
+              nombre: true
+            },
+          }
+        },
+      }
+    }
   });
 };
 
@@ -33,8 +46,7 @@ export const crearStand = async (datos) => {
   return await prisma.stand.create({
     data: {
       nombre: datos.nombre,
-      sectorId: datos.sectorId,
-      estado: datos.estado ?? "Disponible",
+      sectorId: datos.sectorId
     },
     include: { sector: true },
   });
