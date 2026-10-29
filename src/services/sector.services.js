@@ -1,25 +1,51 @@
 import prisma from "../config/prisma.js";
 import { crearError } from "../utils/errores.js";
+import { construirRespuestaPaginada } from "../utils/construirRespuestaPaginada.js"
 
-export const obtenerSectores = async () => {
-  return prisma.sector.findMany({
-    include: {
-      pabellon: {
-        select: {
-          id: true,
-          nombre: true,
-        },
+export const obtenerSectores = async ( criterios ) => {
+  const { nombre, ordenPor, direccion, pagina, limite } = criterios
+
+  const where = {}
+
+  if (nombre) {
+    where.nombre = { contains: nombre, mode: "insensitive" }
+  }
+
+  const desplazamiento = (pagina - 1) * limite
+
+  const [ sectores, total ] = await prisma.$transaction([
+    prisma.sector.findMany({
+      where: where,
+      orderBy: [ { [ordenPor]: direccion }, { id: "asc"} ],
+      skip: desplazamiento,
+      take: limite,
+
+      omit: {
+        descripcion: true,
+        pabellonId: true
       },
-      stands: {
-        select: {
-          id: true,
-          nombre: true,
-          estado: true,
+
+      include: {
+        pabellon: {
+          select: {
+            id: true,
+            nombre: true
+          }
         },
-      },
-    },
-    orderBy: { id: "asc" },
-  });
+        stands: {
+          select: {
+            id: true,
+            nombre: true
+          }
+        }
+      }
+    }),
+    prisma.sector.count( { where: where } )
+  ])
+
+  const sectoresDto = { nombre: "sectores", datos: sectores }
+
+  return construirRespuestaPaginada(sectoresDto, total, pagina, limite)
 };
 
 export const obtenerSectorPorId = async (id) => {

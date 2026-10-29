@@ -12,18 +12,21 @@ import { soloAdmin } from "../middlewares/soloAdmin.js";
 import {
   validarBody,
   validarParametros,
+  validarConsulta
+
 } from "../middlewares/validacion.middleware.js";
 import {
   crearPabellonSchema,
   actualizarPabellonSchema,
   pabellonIdParamSchema,
+  consultarPabellonesSchema
 } from "../validators/pabellon.schema.js";
 
 const router = Router();
 
 
 // Rutas Públicas (Lectura)
-router.get("/", obtenerTodos);
+router.get("/", validarConsulta(consultarPabellonesSchema), obtenerTodos);
 router.get("/:id", validarParametros(pabellonIdParamSchema), obtenerPorId);
 
 // Rutas Protegidas (Gestión Administrativa)

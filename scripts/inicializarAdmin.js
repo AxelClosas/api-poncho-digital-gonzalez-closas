@@ -4,7 +4,7 @@ import prisma from "../src/config/prisma.js";
 import { crearAdministradorSchema } from "../src/validators/usuarios.schemas.js";
 
 try {
-  const dto = crearAdministradorSchema.strict().parse({
+    const dto = crearAdministradorSchema.strict().parse({
     nombre: process.env.ADMIN_NOMBRE,
     apellido: process.env.ADMIN_APELLIDO,
     email: process.env.ADMIN_EMAIL,

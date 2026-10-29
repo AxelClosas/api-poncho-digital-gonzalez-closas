@@ -26,13 +26,9 @@ import {
     autorizarRoles,
 } from "../middlewares/autorizacion.middleware.js";
 
-const router = Router();
+import { soloAdmin } from "../middlewares/soloAdmin.js"
 
-const soloAdmin = [
-    autenticarUsuario,
-    cargarContextoUsuario,
-    autorizarRoles("ADMINISTRADOR"),
-];
+const router = Router();
 
 const artesanoOAdmin = [
     autenticarUsuario,
@@ -61,6 +57,6 @@ router.patch(
 )
 
 // Eliminacion Administrativa
-router.delete("/:id",...soloAdmin,validarParametros(emprendimientoIdParamSchema), eliminar);
+// router.delete("/:id",...soloAdmin(),validarParametros(emprendimientoIdParamSchema), eliminar);
 
 export default router;

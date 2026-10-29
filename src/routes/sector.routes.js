@@ -12,18 +12,20 @@ import { soloAdmin } from "../middlewares/soloAdmin.js";
 import {
   validarBody,
   validarParametros,
+  validarConsulta
 } from "../middlewares/validacion.middleware.js";
 import {
   crearSectorSchema,
   actualizarSectorSchema,
   sectorIdParamSchema,
+  consultarSectoresSchema
 } from "../validators/sector.schema.js";
 
 const router = Router();
 
 
 // Rutas Públicas (Lectura)
-router.get("/", obtenerTodos);
+router.get("/", validarConsulta(consultarSectoresSchema), obtenerTodos);
 router.get("/:id", validarParametros(sectorIdParamSchema), obtenerPorId);
 
 // Rutas Protegidas (Gestión Administrativa)

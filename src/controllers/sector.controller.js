@@ -2,7 +2,7 @@ import * as sectorService from "../services/sector.services.js";
 
 export const obtenerTodos = async (req, res, next) => {
   try {
-    const sectores = await sectorService.obtenerSectores();
+    const sectores = await sectorService.obtenerSectores(req.consultaValidada);
     return res.status(200).json(sectores);
   } catch (error) {
     return next(error);

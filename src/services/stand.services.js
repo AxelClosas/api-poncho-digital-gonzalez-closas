@@ -9,7 +9,7 @@ export const obtenerStands = async () => {
 
 export const obtenerStandPorId = async (id) => {
   const stand = await prisma.stand.findUnique({
-    where: { id: Number(id) },
+    where: { id: id },
     include: { sector: true },
   });
 
@@ -56,7 +56,7 @@ export const actualizarStand = async (id, datos) => {
 
   // 3. Actualizamos
   return await prisma.stand.update({
-    where: { id: Number(id) },
+    where: { id: id },
     data: {
       nombre: datos.nombre,
       sectorId: datos.sectorId,
@@ -69,6 +69,6 @@ export const actualizarStand = async (id, datos) => {
 export const eliminarStand = async (id) => {
   await obtenerStandPorId(id);
   return await prisma.stand.delete({
-    where: { id: Number(id) },
+    where: { id: id },
   });
 };

@@ -31,10 +31,15 @@ model Sector{
   stands     Stand[]
 }
 
-model Stand{
+enum EstadoStand {
+  DISPONIBLE
+  OCUPADO
+}
+
+model Stand {
   id        String   @id @default(uuid()) @db.Uuid
   nombre    String   
-  estado    String   @default("Disponible")
+  estado    EstadoStand   @default(DISPONIBLE)
 
   sectorId  String @db.Uuid
   sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
@@ -53,10 +58,13 @@ model Emprendimiento{
   standId       String?     @unique @db.Uuid
   stand         Stand?   @relation(fields: [standId], references: [id], onDelete: SetNull)
 
-  rubroId         Int?
+  rubroId         String? @db.Uuid
   rubro           Rubro?      @relation(fields: [rubroId], references: [id], onDelete: SetNull)
 
   productos     Producto[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Producto{
@@ -67,10 +75,13 @@ model Producto{
   
   emprendimientoId String @db.Uuid
   emprendimiento   Emprendimiento @relation(fields: [emprendimientoId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Rubro{
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid()) @db.Uuid
   nombre     String  @unique 
   descripcion String?
 
@@ -127,7 +138,7 @@ model UsuarioRol {
 
 model Inscripcion {
   id                String     @id        @default(uuid()) @db.Uuid
-  nroTramite        Int        @unique    @default(autoincrement())
+  nroTramite        String        @unique    @default(uuid()) @db.Uuid
 
   nroEdicion        Int
 
@@ -137,7 +148,7 @@ model Inscripcion {
   evaluadorId       String?    @db.Uuid
   evaluador         Usuario?   @relation("Evalua", fields: [evaluadorId], references: [id], onDelete: SetNull)
 
-  estadoId          Int
+  estadoId          String     @db.Uuid
   estado            Estado   @relation(fields: [estadoId], references: [id], onDelete: Restrict)
 
   createdAt         DateTime   @default(now())
@@ -145,7 +156,7 @@ model Inscripcion {
 }
 
 model Estado {
-  id              Int           @id       @default(autoincrement())
+  id              String        @id       @default(uuid()) @db.Uuid
   nombre          String        @unique
 
   inscripciones     Inscripcion[]

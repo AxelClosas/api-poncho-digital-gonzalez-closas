@@ -1,23 +1,61 @@
 import prisma from "../config/prisma.js";
 import { crearError } from "../utils/errores.js";
+import { construirRespuestaPaginada } from "../utils/construirRespuestaPaginada.js"
 
-export const obtenerPabellones = async () => {
-  return prisma.pabellon.findMany({
-    include: {
-      sectores: {
-        select: {
-          id: true,
-          nombre: true,
-          descripcion: true,
-        },
-      },
-    },
-    orderBy: { id: "asc" },
-  });
+export const obtenerPabellones = async ( criterios ) => {
+  const {
+    nombre, ordenPor, direccion, pagina, limite
+  } = criterios
+  
+  // Filtros
+  const where = {}
+
+  if (nombre) {
+    where.nombre = {
+      contains: nombre,
+      mode: "insensitive"
+    }
+  }
+
+  // Criterios de paginación
+  const desplazamiento = (pagina - 1) * limite
+
+  const [ pabellones, total ] = await prisma.$transaction([
+    prisma.pabellon.findMany({
+      // Filtros
+      where: where,
+      // Criterio de ordenación
+      // El segundo elemento del array en orderBy es el campo de desempate
+      orderBy: [ { [ordenPor]: direccion}, { id: "asc"} ],
+
+      // Criterio de paginación
+      skip: desplazamiento,
+      take: limite,
+
+      // Incluir relaciones
+      include: {
+        sectores: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          }
+        }
+      }
+    }),
+    prisma.pabellon.count({ where: where })
+  ])
+
+  const pabellonesDto = {
+    nombre: "pabellones",
+    datos: pabellones
+  }
+  // Construir respuesta paginada
+  return construirRespuestaPaginada(pabellonesDto, total, pagina, limite )
 };
 
 export const obtenerPabellonPorId = async (id) => {
-  const pabellon = await prisma.pabellon.findUnique({
+  const pabellon = await prisma.pabellon.findFirst({
     where: { id },
     include: {
       sectores: true,

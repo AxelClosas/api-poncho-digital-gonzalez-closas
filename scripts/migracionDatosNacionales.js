@@ -14,7 +14,7 @@ async function obtenerDatos(endpoint, params = {}) {
   return response.json();
 }
 
-async function migrar() {
+export async function migrar() {
   console.log('Iniciando migración de datos geográficos...');
 
   try {
@@ -84,5 +84,3 @@ async function migrar() {
     await prisma.$disconnect();
   }
 }
-
-migrar();

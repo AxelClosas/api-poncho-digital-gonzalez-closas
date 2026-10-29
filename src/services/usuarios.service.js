@@ -74,8 +74,8 @@ export const crearAdministrador = async (dto) => {
     throw crearError("La localidad indicada no existe.", 400);
   }
 
-  const rolAdmin = await prisma.rol.findUnique({
-    where: { nombre: "ADMINISTRADOR" },
+  const rolAdmin = await prisma.rol.findFirst({
+    where: { nombre: { contains: "ADMINISTRADOR", mode: "insensitive"} },
   });
   if (!rolAdmin) {
     throw crearError("El rol ADMINISTRADOR no está configurado en el sistema.", 500);
@@ -163,7 +163,7 @@ export const consultarUsuarios = async (criterios) => {
 
   if (rol) {
     where.roles = {
-      some: { rol: { nombre: { equals: rol.toUpperCase() } } },
+      some: { rol: { nombre: { contains: rol, mode: "insensitive" } } },
     };
   }
 
@@ -247,13 +247,14 @@ export const cambiarEstadoActivo = async (usuarioId, nuevoEstadoActivo) => {
 };
 
 export const agregarRolAUsuario = async (usuarioId, nombreRol) => {
+  console.log("NOMBRE ROL: ", nombreRol);
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.findUnique({ where: { id: usuarioId } });
     if (!usuario) {
       throw crearError(`Usuario con ID ${usuarioId} no encontrado.`, 404);
     }
 
-    const rol = await tx.rol.findUnique({ where: { nombre: nombreRol } });
+    const rol = await tx.rol.findFirst({ where: { nombre: { contains: nombreRol, mode: "insensitive" } } });
     if (!rol) {
       throw crearError(`El rol ${nombreRol} no existe.`, 400);
     }

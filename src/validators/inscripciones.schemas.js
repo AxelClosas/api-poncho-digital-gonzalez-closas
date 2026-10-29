@@ -50,11 +50,15 @@ export const postularseSchema = z
           .positive("El ID de rubro debe ser un entero positivo."),
       })
       .strict(),
-
-    nroEdicion: z
-      .number({ required_error: "El número de edición es obligatorio." })
-      .int()
-      .positive("El número de edición debe ser un entero positivo."),
+      // Cambio en la lógica de negocio. La edición será determinada por el backend, no por el usuario. Por lo tanto, se elimina la validación de nroEdicion en el schema de postulación.
+    // nroEdicion: z
+    //   .number({
+    //     required_error: "El año de edición es obligatorio.",
+    //     invalid_type_error: "El año de edición debe ser un número.",
+    //   })
+    //   .int("El año de edición debe ser un número entero.")
+    //   .min(new Date().getFullYear(), "El año de edición no puede ser mayor al año actual.")
+    //   .positive("El año de edición debe ser un número positivo."),
   })
   .strict();
 

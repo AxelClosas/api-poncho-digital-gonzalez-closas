@@ -69,7 +69,7 @@ export const agregarRol = async (req, res, next) => {
   try {
     const resultado = await usuariosService.agregarRolAUsuario(
       req.parametrosValidados.id,
-      req.bodyValidado.rol
+      req.bodyValidado.nombre
     );
     return res.status(200).json(resultado);
   } catch (error) {
