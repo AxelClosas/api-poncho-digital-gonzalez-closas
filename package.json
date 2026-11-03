@@ -24,7 +24,8 @@
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
     "iniciar": "node scripts/inicializar-bd.js",
-    "admin": "node scripts/inicializarAdmin.js"
+    "admin": "node scripts/inicializarAdmin.js",
+    "docs": "node generar-docs.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -34,10 +35,12 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "prisma": "^7.10.0"
+    "prisma": "^7.10.0",
+    "swagger-autogen": "^2.23.7"
   },
   "allowScripts": {
     "@prisma/engines@7.10.0": true,

@@ -3,6 +3,9 @@ import { logger } from "./middlewares/logger.js"
 import { manejadorErrores } from "./middlewares/manejadorErrores.js"
 import { noEncontrado } from "./middlewares/noEncontrado.js"
 
+import swaggerUi from "swagger-ui-express";
+import { readFileSync } from "node:fs";
+
 import indexRoutes from "./routes/index.routes.js"
 
 import { iniciarLimpiezaRevocaciones } from "./tareas/limpiezaRevocaciones.js";
@@ -24,6 +27,13 @@ app.get('/', (req, res) => {
 })
 
 app.use(noEncontrado)
+
+// Quizás pueda reutilizar la función ruta que definí en generar-docs.js para no repetir código
+const swaggerDocument = JSON.parse(
+  readFileSync(new URL("../swagger-output.json", import.meta.url), "utf8"),
+);
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(manejadorErrores)
 
