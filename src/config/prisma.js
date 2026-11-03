@@ -8,6 +8,7 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({
     adapter,
+    log: ["query", "info", "warn", "error"] // Activar LOGS de Prisma
 });
 
 export default prisma;
