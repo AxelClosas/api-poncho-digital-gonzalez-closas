@@ -1,4 +1,5 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js"
 
 // Schema para la postulación pública completa
 export const postularseSchema = z
@@ -44,21 +45,9 @@ export const postularseSchema = z
           .trim()
           .min(2, "El nombre del emprendimiento debe tener al menos 2 caracteres."),
         descripcion: z.string().trim().max(1000).optional().nullable(),
-        rubroId: z
-          .number({ required_error: "El rubro es obligatorio." })
-          .int()
-          .positive("El ID de rubro debe ser un entero positivo."),
+        rubroId: uuidSchema,
       })
-      .strict(),
-      // Cambio en la lógica de negocio. La edición será determinada por el backend, no por el usuario. Por lo tanto, se elimina la validación de nroEdicion en el schema de postulación.
-    // nroEdicion: z
-    //   .number({
-    //     required_error: "El año de edición es obligatorio.",
-    //     invalid_type_error: "El año de edición debe ser un número.",
-    //   })
-    //   .int("El año de edición debe ser un número entero.")
-    //   .min(new Date().getFullYear(), "El año de edición no puede ser mayor al año actual.")
-    //   .positive("El año de edición debe ser un número positivo."),
+      .strict()
   })
   .strict();
 
@@ -76,16 +65,13 @@ export const consultarInscripcionesSchema = z.object({
 // Schema para cambiar el estado de la inscripción (Admin)
 export const cambiarEstadoSchema = z
   .object({
-    estadoId: z
-      .number({ required_error: "El estadoId es obligatorio." })
-      .int()
-      .positive("El ID del estado debe ser un entero positivo."),
-    standId: z.number().int().positive().nullable().optional(), // Opcional si se aprueba y se asigna stand
+    estadoId: uuidSchema,
+    standId: uuidSchema.nullable().optional(), // Opcional si se aprueba y se asigna stand
   })
   .strict();
 
 export const inscripcionIdParamSchema = z
   .object({
-    id: z.string().uuid("El ID de inscripción debe ser un UUID válido."),
+    id: uuidSchema,
   })
   .strict();

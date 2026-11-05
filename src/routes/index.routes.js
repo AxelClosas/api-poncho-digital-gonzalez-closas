@@ -15,16 +15,49 @@ import usuariosRoutes from "./usuarios.routes.js";
 
 const router = Router()
 
-router.use("/usuarios", usuariosRoutes);
+router.use("/usuarios",
+  /* #swagger.tags = ["usuarios"]
+  #swagger.security = [{ bearerAuth: [] }]*/
+  usuariosRoutes);
 
-router.use("/pabellones", pabellonRoutes);
-router.use("/stands", standRoutes);
-router.use("/sectores", sectorRoutes);
-router.use("/emprendimientos", emprendimientoRoutes);
-router.use("/rubros", rubroRoutes);
-router.use("/roles", rolesRoutes);
-router.use("/estados", estadosRoutes);
-router.use("/productos", productosRoutes);
-router.use("/inscripciones", inscripcionesRoutes);
+router.use("/pabellones",
+  /* #swagger.tags = ["pabellones"] */
+  pabellonRoutes);
+
+router.use("/stands",
+  /* #swagger.tags = ["stands"] */
+  standRoutes);
+
+router.use("/sectores",
+  /* #swagger.tags = ["sectores"] */
+  sectorRoutes);
+
+router.use("/emprendimientos",
+  /* #swagger.tags = ["emprendimientos"] */
+  emprendimientoRoutes);
+
+router.use("/rubros",
+  /* #swagger.tags = ["rubros"] */
+  rubroRoutes);
+
+router.use("/roles",
+  /* #swagger.tags = ["roles"] */
+  rolesRoutes);
+
+router.use("/estados",
+  /* #swagger.tags = ["estados"] */
+  estadosRoutes);
+
+router.use("/productos",
+  /* #swagger.tags = ["productos"] */
+  productosRoutes);
+
+router.use("/inscripciones",
+  /* #swagger.tags = ["inscripciones"]
+  
+  */
+  
+  inscripcionesRoutes
+);
 
 export default router

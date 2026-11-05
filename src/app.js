@@ -17,6 +17,11 @@ BigInt.prototype.toJSON = function () {
 
 const app = express();
 const PORT = 3000;
+// Quizás pueda reutilizar la función ruta que definí en generar-docs.js para no repetir código
+const swaggerDocument = JSON.parse(
+  readFileSync(new URL("../swagger-output.json", import.meta.url), "utf8"),
+);
+
 app.use(logger)
 app.use(express.json());
 
@@ -26,14 +31,11 @@ app.get('/', (req, res) => {
   res.json({ mensaje: 'API Funcionando' })
 })
 
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use(noEncontrado)
 
-// Quizás pueda reutilizar la función ruta que definí en generar-docs.js para no repetir código
-const swaggerDocument = JSON.parse(
-  readFileSync(new URL("../swagger-output.json", import.meta.url), "utf8"),
-);
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(manejadorErrores)
 

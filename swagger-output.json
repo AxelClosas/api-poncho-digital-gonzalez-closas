@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API de Gestión del Poncho Digital",
+    "title": "API REST - Poncho Digital",
     "version": "1.0.0",
     "description": "Borrador: revisar esquemas, errores y permisos."
   },
@@ -24,16 +24,67 @@
     },
     "/api/usuarios/login": {
       "post": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Permite a un usuario iniciar sesión con una cuenta activa.",
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Inscripción creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioAutenticado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo inválido o Bearer mal formado."
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                },
+                "example": {
+                  "mensaje": "Se requiere un token de acceso."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cuenta inactiva."
+          },
+          "404": {
+            "description": "Usuario no encontrado."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IniciarSesion"
+              }
+            }
           }
         }
       }
     },
     "/api/usuarios/logout": {
       "post": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "responses": {
           "204": {
@@ -45,11 +96,19 @@
           "401": {
             "description": "Unauthorized"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/me": {
       "get": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "responses": {
           "200": {
@@ -61,31 +120,55 @@
           "401": {
             "description": "Unauthorized"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/administradores": {
       "post": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/": {
       "get": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/{id}": {
       "get": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "parameters": [
           {
@@ -101,11 +184,19 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/{id}/activo": {
       "patch": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "parameters": [
           {
@@ -121,11 +212,19 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/{id}/roles": {
       "post": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "parameters": [
           {
@@ -141,9 +240,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "usuarios"
+        ],
         "description": "",
         "parameters": [
           {
@@ -159,29 +266,51 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/pabellones/": {
       "get": {
+        "tags": [
+          "pabellones"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "post": {
+        "tags": [
+          "pabellones"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/pabellones/{id}": {
       "get": {
+        "tags": [
+          "pabellones"
+        ],
         "description": "",
         "parameters": [
           {
@@ -197,9 +326,15 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "put": {
+        "tags": [
+          "pabellones"
+        ],
         "description": "",
         "parameters": [
           {
@@ -215,9 +350,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "pabellones"
+        ],
         "description": "",
         "parameters": [
           {
@@ -233,29 +376,51 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/stands/": {
       "get": {
+        "tags": [
+          "stands"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "post": {
+        "tags": [
+          "stands"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/stands/{id}": {
       "get": {
+        "tags": [
+          "stands"
+        ],
         "description": "",
         "parameters": [
           {
@@ -271,9 +436,15 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "put": {
+        "tags": [
+          "stands"
+        ],
         "description": "",
         "parameters": [
           {
@@ -289,9 +460,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "stands"
+        ],
         "description": "",
         "parameters": [
           {
@@ -307,29 +486,51 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/sectores/": {
       "get": {
+        "tags": [
+          "sectores"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "post": {
+        "tags": [
+          "sectores"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/sectores/{id}": {
       "get": {
+        "tags": [
+          "sectores"
+        ],
         "description": "",
         "parameters": [
           {
@@ -345,9 +546,15 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "put": {
+        "tags": [
+          "sectores"
+        ],
         "description": "",
         "parameters": [
           {
@@ -363,9 +570,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "sectores"
+        ],
         "description": "",
         "parameters": [
           {
@@ -381,21 +596,37 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/emprendimientos/": {
       "get": {
+        "tags": [
+          "emprendimientos"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/emprendimientos/{id}": {
       "get": {
+        "tags": [
+          "emprendimientos"
+        ],
         "description": "",
         "parameters": [
           {
@@ -414,9 +645,17 @@
           "404": {
             "description": "Not Found"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "patch": {
+        "tags": [
+          "emprendimientos"
+        ],
         "description": "",
         "parameters": [
           {
@@ -432,29 +671,51 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/rubros/": {
       "get": {
+        "tags": [
+          "rubros"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "post": {
+        "tags": [
+          "rubros"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/rubros/{id}": {
       "get": {
+        "tags": [
+          "rubros"
+        ],
         "description": "",
         "parameters": [
           {
@@ -470,9 +731,15 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "put": {
+        "tags": [
+          "rubros"
+        ],
         "description": "",
         "parameters": [
           {
@@ -488,9 +755,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "rubros"
+        ],
         "description": "",
         "parameters": [
           {
@@ -506,29 +781,53 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/roles/": {
       "get": {
+        "tags": [
+          "roles"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "post": {
+        "tags": [
+          "roles"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/roles/{id}": {
       "get": {
+        "tags": [
+          "roles"
+        ],
         "description": "",
         "parameters": [
           {
@@ -544,9 +843,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "put": {
+        "tags": [
+          "roles"
+        ],
         "description": "",
         "parameters": [
           {
@@ -562,9 +869,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "roles"
+        ],
         "description": "",
         "parameters": [
           {
@@ -580,29 +895,53 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/estados/": {
       "get": {
+        "tags": [
+          "estados"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "post": {
+        "tags": [
+          "estados"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/estados/{id}": {
       "get": {
+        "tags": [
+          "estados"
+        ],
         "description": "",
         "parameters": [
           {
@@ -618,9 +957,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "put": {
+        "tags": [
+          "estados"
+        ],
         "description": "",
         "parameters": [
           {
@@ -636,9 +983,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "estados"
+        ],
         "description": "",
         "parameters": [
           {
@@ -654,29 +1009,51 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/productos/": {
       "get": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "post": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "responses": {
           "201": {
             "description": "Created"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/productos/{id}": {
       "get": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "parameters": [
           {
@@ -692,9 +1069,15 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {}
+        ]
       },
       "put": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "parameters": [
           {
@@ -710,9 +1093,17 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "parameters": [
           {
@@ -728,41 +1119,114 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/productos/me/mis-productos": {
       "get": {
+        "tags": [
+          "productos"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/inscripciones/postularse": {
       "post": {
+        "tags": [
+          "inscripciones"
+        ],
+        "summary": "Permite a un usuario postularse a un puesto en el Festival del Poncho.",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Inscripción creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostulacionCreada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo inválido o Bearer mal formado."
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                },
+                "example": {
+                  "mensaje": "Se requiere un token de acceso."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cuenta inactiva."
+          },
+          "404": {
+            "description": "Evento inexistente."
+          },
+          "409": {
+            "description": "Inscripción duplicada o conflicto de datos."
+          }
+        },
+        "security": [
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NuevaPostulacion"
+              }
+            }
           }
         }
       }
     },
     "/api/inscripciones/": {
       "get": {
+        "tags": [
+          "inscripciones"
+        ],
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/inscripciones/{id}/estado": {
       "patch": {
+        "tags": [
+          "inscripciones"
+        ],
         "description": "",
         "parameters": [
           {
@@ -777,6 +1241,272 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ErrorApi": {
+        "type": "object",
+        "required": [
+          "mensaje"
+        ],
+        "properties": {
+          "mensaje": {
+            "type": "string"
+          }
+        }
+      },
+      "IniciarSesion": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "email": "admin@poncho.com",
+          "password": "ContraseñaSegura2026!"
+        }
+      },
+      "NuevaPostulacion": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 2
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 2
+          },
+          "cuil": {
+            "type": "string"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "description": "Tipo de dato no representable en OpenAPI 3.0, se serializa como string."
+          },
+          "sexo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "localidadId": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "emprendimiento": {
+            "type": "object",
+            "properties": {
+              "nombre": {
+                "type": "string",
+                "minLength": 2
+              },
+              "descripcion": {
+                "nullable": true,
+                "type": "string",
+                "maxLength": 1000
+              },
+              "rubroId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "required": [
+              "nombre",
+              "rubroId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "nombre",
+          "apellido",
+          "cuil",
+          "fechaNacimiento",
+          "sexo",
+          "email",
+          "password",
+          "localidadId",
+          "emprendimiento"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "nombre": "Juan",
+          "apellido": "Pérez",
+          "cuil": "20123456789",
+          "fechaNacimiento": "2000-11-01T18:00:00Z",
+          "sexo": "M",
+          "email": "usuario@ejemplo.com",
+          "password": "Secret123!",
+          "localidadId": "6049040",
+          "emprendimiento": {
+            "nombre": "Panadería Central",
+            "descripcion": "Venta de productos panificados artesanales.",
+            "rubroId": "2a49ad7b-e0d9-4649-8214-7042f913c0bf"
+          }
+        }
+      },
+      "PostulacionCreada": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "apellido",
+          "cuil",
+          "fechaNacimiento",
+          "sexo",
+          "email",
+          "password",
+          "localidadId",
+          "emprendimiento"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 2,
+            "example": "Juan"
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 2,
+            "example": "Pérez"
+          },
+          "cuil": {
+            "type": "string",
+            "pattern": "^\\d{2}-?\\d{8}-?\\d{1}$|^\\d{11}$",
+            "description": "CUIL de 11 dígitos, con o sin guiones (ej. 20123456789 o 20-12345678-9).",
+            "example": "20123456789"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha en formato ISO 8601.",
+            "example": "2000-11-01T18:00:00Z"
+          },
+          "sexo": {
+            "type": "string",
+            "minLength": 1,
+            "example": "M"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "usuario@ejemplo.com"
+          },
+          "localidadId": {
+            "type": "string",
+            "pattern": "^\\d+$",
+            "description": "ID numérico de la localidad enviado como cadena/número y parseado a entero grande (BigInt).",
+            "example": "42"
+          },
+          "emprendimiento": {
+            "type": "object",
+            "required": [
+              "nombre",
+              "rubroId"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "nombre": {
+                "type": "string",
+                "minLength": 2,
+                "example": "Panadería Central"
+              },
+              "descripcion": {
+                "type": "string",
+                "maxLength": 1000,
+                "nullable": true,
+                "example": "Venta de productos panificados artesanales."
+              },
+              "rubroId": {
+                "type": "string",
+                "example": "00a1dv45-dx19-2301-2471-223932594567"
+              }
+            }
+          }
+        }
+      },
+      "UsuarioAutenticado": {
+        "type": "object",
+        "required": [
+          "mensaje",
+          "usuario",
+          "token"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "mensaje": {
+            "type": "string"
+          },
+          "usuario": {
+            "required": [
+              "id",
+              "nombre",
+              "apellido",
+              "email",
+              "roles"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "nombre": {
+                "type": "string"
+              },
+              "apellido": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "token": {
+            "type": "string"
           }
         }
       }

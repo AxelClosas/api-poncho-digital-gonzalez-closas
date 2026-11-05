@@ -26,8 +26,8 @@ const router = express.Router();
 
 
 // Rutas Públicas (Catálogo y Detalle)
-router.get("/", validarConsulta(consultarProductosSchema), consultarProductos);
-router.get("/:id", validarParametros(productoIdParamSchema), obtenerProductoPorId);
+router.get("/", /* #swagger.security = [{}] */ validarConsulta(consultarProductosSchema), consultarProductos);
+router.get("/:id", /* #swagger.security = [{}] */ validarParametros(productoIdParamSchema), obtenerProductoPorId);
 
 // Rutas Protegidas del Artesano
 router.get("/me/mis-productos", ...soloArtesano(), listarMisProductos);

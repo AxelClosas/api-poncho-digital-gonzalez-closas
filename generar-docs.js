@@ -1,9 +1,10 @@
 import swaggerAutogen from "swagger-autogen";
 import { fileURLToPath } from "node:url";
+import * as esquemas from "./src/docs/esquemas.js"
 
 const doc = {
   info: {
-    title: "API de Gestión del Poncho Digital",
+    title: "API REST - Poncho Digital",
     version: "1.0.0",
     description: "Borrador: revisar esquemas, errores y permisos."
   },
@@ -11,6 +12,13 @@ const doc = {
     url: "/",
     description: "Servidor actual"
   }],
+  components: {
+    securitySchemes: {
+      bearerAuth: { type: "http", scheme: "bearer",
+      bearerFormat: "JWT" }
+    },
+    "@schemas": esquemas
+  }
 };
 
 const ruta = (archivo) => fileURLToPath(new URL(archivo, import.meta.url)).replaceAll("\\", "/");

@@ -23,7 +23,39 @@ const router = express.Router();
 
 
 // 1. Postulación pública (abierta a postulantes)
-router.post("/postularse", validarBody(postularseSchema), postularse);
+router.post("/postularse",
+  /*
+  #swagger.security = [{}]
+  #swagger.summary = "Permite a un usuario postularse a un puesto en el Festival del Poncho."
+  #swagger.auto = false
+
+  #swagger.requestBody = { required: true, content: {
+  "application/json": { schema: { $ref: "#/components/schemas/NuevaPostulacion" } } }
+  }
+
+  #swagger.responses[201] = {
+    description: "Inscripción creada.", content: {
+    "application/json": { schema: { $ref: "#/components/schemas/PostulacionCreada" } } }
+  }
+
+  #swagger.responses[401] = {
+    description: "Token ausente o inválido.", content: {
+    "application/json": { schema: { $ref: "#/components/schemas/ErrorApi" },
+    example: { mensaje: "Se requiere un token de acceso." } } }
+  }
+
+  #swagger.responses[400] = { description: "Cuerpo inválido o Bearer mal formado." }
+
+  #swagger.responses[403] = { description: "Cuenta inactiva." }
+
+  #swagger.responses[404] = { description: "Evento inexistente." }
+
+  #swagger.responses[409] = { description: "Inscripción duplicada o conflicto de datos." }
+*/
+  validarBody(postularseSchema), postularse
+  
+);
+
 
 // 2. Consulta de trámites (requiere rol Administrador)
 router.get(

@@ -39,7 +39,35 @@ import { cerrarSesion } from "../controllers/sesiones.controller.js";
 const router = express.Router();
 
 // 1. Ruta pública de acceso
-router.post("/login", validarBody(iniciarSesionSchema), iniciarSesion);
+router.post("/login",
+  /* 
+    #swagger.security = [{ "bearerAuth": [] }]
+  #swagger.summary = "Permite a un usuario iniciar sesión con una cuenta activa."
+  #swagger.auto = false
+
+  #swagger.requestBody = { required: true, content: {
+  "application/json": { schema: { $ref: "#/components/schemas/IniciarSesion" } } }
+  }
+
+  #swagger.responses[201] = {
+    description: "Inscripción creada.", content: {
+    "application/json": { schema: { $ref: "#/components/schemas/UsuarioAutenticado" } } }
+  }
+
+  #swagger.responses[401] = {
+    description: "Token ausente o inválido.", content: {
+    "application/json": { schema: { $ref: "#/components/schemas/ErrorApi" },
+    example: { mensaje: "Se requiere un token de acceso." } } }
+  }
+
+  #swagger.responses[400] = { description: "Cuerpo inválido o Bearer mal formado." }
+
+  #swagger.responses[403] = { description: "Cuenta inactiva." }
+
+  #swagger.responses[404] = { description: "Usuario no encontrado." }  
+  */
+  
+  validarBody(iniciarSesionSchema), iniciarSesion);
 router.post("/logout", autenticarUsuario, cerrarSesion);
 
 // 2. Ruta para obtener el perfil propio del usuario autenticado
