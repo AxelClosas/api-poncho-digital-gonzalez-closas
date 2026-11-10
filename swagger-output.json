@@ -1706,10 +1706,18 @@
         "tags": [
           "rubros"
         ],
-        "description": "",
+        "summary": "Lista todos los rubros (público).",
+        "description": "Devuelve un arreglo sin paginación, ordenado por ID ascendente.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Listado de rubros.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaRubros"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1720,17 +1728,47 @@
         "tags": [
           "rubros"
         ],
+        "summary": "Crea un rubro (solo ADMINISTRADOR).",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Rubro creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubroRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo inválido o encabezado Authorization mal formado."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inhabilitada o sin rol ADMINISTRADOR."
+          },
+          "409": {
+            "description": "Ya existe un rubro con ese nombre o hay un conflicto de datos."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearRubro"
+              }
+            }
+          }
+        }
       }
     },
     "/api/rubros/{id}": {
@@ -1738,20 +1776,45 @@
         "tags": [
           "rubros"
         ],
-        "description": "",
+        "summary": "Obtiene un rubro por ID (público).",
+        "description": "Incluye el ID y el nombre de los emprendimientos asociados.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
+            },
+            "description": "UUID del rubro."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rubro encontrado con sus emprendimientos asociados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubroDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El ID no es un UUID válido."
+          },
+          "404": {
+            "description": "Rubro inexistente."
           }
         },
         "security": [
@@ -1762,46 +1825,127 @@
         "tags": [
           "rubros"
         ],
-        "description": "",
+        "summary": "Actualiza un rubro (solo ADMINISTRADOR).",
+        "description": "Permite actualizar nombre y/o descripción. Los campos omitidos conservan su valor. La descripción admite null.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "UUID del rubro.",
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rubro actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubroRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID, cuerpo o encabezado Authorization inválidos."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inhabilitada o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Rubro inexistente."
+          },
+          "409": {
+            "description": "Ya existe otro rubro con ese nombre o hay un conflicto de datos."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarRubro"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
           "rubros"
         ],
-        "description": "",
+        "summary": "Elimina un rubro (solo ADMINISTRADOR).",
+        "description": "No permite eliminar rubros con emprendimientos asociados.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
+            },
+            "description": "UUID del rubro."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rubro eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                },
+                "example": {
+                  "mensaje": "Rubro eliminado correctamente."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido o encabezado Authorization mal formado."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inhabilitada o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Rubro inexistente."
+          },
+          "409": {
+            "description": "El rubro tiene emprendimientos asociados o hay un conflicto de datos."
           }
         },
         "security": [
@@ -2765,6 +2909,25 @@
           }
         }
       },
+      "ActualizarRubro": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "descripcion": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "additionalProperties": false,
+        "example": {
+          "descripcion": "Tejidos artesanales en lana e hilo."
+        }
+      },
       "ActualizarSector": {
         "type": "object",
         "additionalProperties": false,
@@ -2972,6 +3135,29 @@
           }
         }
       },
+      "CrearRubro": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "descripcion": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "nombre": "Textil",
+          "descripcion": "Tejidos y productos textiles artesanales."
+        }
+      },
       "CrearSector": {
         "type": "object",
         "additionalProperties": false,
@@ -3151,6 +3337,12 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/RolRespuesta"
+        }
+      },
+      "ListaRubros": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RubroRespuesta"
         }
       },
       "ListaSectoresPaginada": {
@@ -3645,6 +3837,64 @@
           "nombre": {
             "type": "string",
             "example": "ARTESANO"
+          }
+        }
+      },
+      "RubroDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RubroRespuesta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "emprendimientos"
+            ],
+            "properties": {
+              "emprendimientos": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "nombre"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nombre": {
+                      "type": "string",
+                      "example": "Tejidos del Valle"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RubroRespuesta": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "descripcion"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Textil"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "example": "Tejidos y productos textiles artesanales."
           }
         }
       },

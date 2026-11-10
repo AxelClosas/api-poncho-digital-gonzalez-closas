@@ -8,6 +8,10 @@ import {
 
 import { asignarRolSchema, eliminarRolSchema } from "../validators/roles.schemas.js"
 import {
+  crearRubroSchema,
+  actualizarRubroSchema,
+} from "../validators/rubro.schema.js"
+import {
   crearPabellonSchema,
   actualizarPabellonSchema,
 } from "../validators/pabellon.schema.js"
@@ -747,4 +751,68 @@ export const RolRespuesta = {
 export const ListaRoles = {
   type: "array",
   items: { $ref: "#/components/schemas/RolRespuesta" }
+};
+
+// RUBROS
+export const CrearRubro = {
+  ...z.toJSONSchema(crearRubroSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "Textil",
+    descripcion: "Tejidos y productos textiles artesanales.",
+  },
+};
+
+export const ActualizarRubro = {
+  ...z.toJSONSchema(actualizarRubroSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    descripcion: "Tejidos artesanales en lana e hilo.",
+  },
+};
+
+export const RubroRespuesta = {
+  type: "object",
+  required: ["id", "nombre", "descripcion"],
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "Textil" },
+    descripcion: {
+      type: "string",
+      nullable: true,
+      example: "Tejidos y productos textiles artesanales.",
+    },
+  },
+};
+
+export const RubroDetalle = {
+  allOf: [
+    { $ref: "#/components/schemas/RubroRespuesta" },
+    {
+      type: "object",
+      required: ["emprendimientos"],
+      properties: {
+        emprendimientos: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["id", "nombre"],
+            properties: {
+              id: { type: "string", format: "uuid" },
+              nombre: { type: "string", example: "Tejidos del Valle" },
+            },
+          },
+        },
+      },
+    },
+  ],
+};
+
+export const ListaRubros = {
+  type: "array",
+  items: { $ref: "#/components/schemas/RubroRespuesta" },
 };
