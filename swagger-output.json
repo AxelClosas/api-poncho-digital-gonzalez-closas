@@ -1771,12 +1771,178 @@
     "/api/productos/": {
       "get": {
         "tags": [
-          "productos"
+          "Productos"
         ],
+        "summary": "Consultar el catálogo de productos con filtros y paginación",
         "description": "",
+        "parameters": [
+          {
+            "name": "busqueda",
+            "in": "query",
+            "description": "Búsqueda parcial por nombre o descripción, sin distinguir mayúsculas.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emprendimientoId",
+            "in": "query",
+            "description": "Filtrar por el UUID del emprendimiento.",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
+            }
+          },
+          {
+            "name": "rubroId",
+            "in": "query",
+            "description": "Filtrar por el UUID del rubro del emprendimiento.",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
+            }
+          },
+          {
+            "name": "ordenPor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "enum": {
+                  "type": "array",
+                  "example": [
+                    "nombre",
+                    "precio",
+                    "id"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "type": "string",
+                  "example": "id"
+                }
+              }
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "enum": {
+                  "type": "array",
+                  "example": [
+                    "asc",
+                    "desc"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "type": "string",
+                  "example": "asc"
+                }
+              }
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "integer"
+                },
+                "minimum": {
+                  "type": "number",
+                  "example": 1
+                },
+                "default": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "description": "Cantidad de productos por página. Máximo: 50.",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "integer"
+                },
+                "minimum": {
+                  "type": "number",
+                  "example": 1
+                },
+                "maximum": {
+                  "type": "number",
+                  "example": 50
+                },
+                "default": {
+                  "type": "number",
+                  "example": 10
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Listado paginado de productos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaProductosPaginada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de consulta inválidos."
           }
         },
         "security": [
@@ -1785,26 +1951,54 @@
       },
       "post": {
         "tags": [
-          "productos"
+          "Productos"
         ],
+        "summary": "Crea un producto en el emprendimiento del artesano autenticado.",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Producto creado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, formato de autorización incorrecto o artesano sin emprendimiento."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o usuario sin el rol ARTESANO."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearProducto"
+              }
+            }
+          }
+        }
       }
     },
     "/api/productos/{id}": {
       "get": {
         "tags": [
-          "productos"
+          "Productos"
         ],
+        "summary": "Obtiene un producto por su UUID.",
         "description": "",
         "parameters": [
           {
@@ -1812,13 +2006,36 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Detalles del producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de ruta inválidos."
+          },
+          "404": {
+            "description": "Producto no encontrado."
           }
         },
         "security": [
@@ -1827,34 +2044,75 @@
       },
       "put": {
         "tags": [
-          "productos"
+          "Productos"
         ],
-        "description": "",
+        "summary": "Actualiza un producto del artesano autenticado.",
+        "description": "Todos los campos del cuerpo son opcionales.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Producto actualizado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID, cuerpo o formato de autorización inválidos."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva, usuario sin rol ARTESANO o producto perteneciente a otro usuario."
+          },
+          "404": {
+            "description": "Producto no encontrado."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarProducto"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "productos"
+          "Productos"
         ],
+        "summary": "Elimina un producto del artesano autenticado.",
         "description": "",
         "parameters": [
           {
@@ -1862,13 +2120,35 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "uuid"
+                }
+              }
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Producto eliminado correctamente. Sin cuerpo de respuesta."
+          },
+          "400": {
+            "description": "UUID o formato de autorización inválidos."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva, usuario sin rol ARTESANO o producto perteneciente a otro usuario."
+          },
+          "404": {
+            "description": "Producto no encontrado."
           }
         },
         "security": [
@@ -1881,12 +2161,32 @@
     "/api/productos/me/mis-productos": {
       "get": {
         "tags": [
-          "productos"
+          "Productos"
         ],
+        "summary": "Listar los productos del artesano autenticado.",
         "description": "",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Productos propios. Devuelve [] si no posee un emprendimiento o productos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Producto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de autorización inválido."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o usuario sin el rol ARTESANO."
           }
         },
         "security": [
