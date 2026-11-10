@@ -1,9 +1,8 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js";
 
 export const rolIdParamSchema = z
-  .object({
-    id: z.coerce.string().uuid("El ID del rol debe ser un UUID válido."),
-  })
+  .object({ id: uuidSchema })
   .strict();
 
 export const crearRolSchema = z
@@ -19,4 +18,7 @@ export const crearRolSchema = z
 
 export const actualizarRolSchema = crearRolSchema;
 
-export const eliminarRolSchema = crearRolSchema
+export const eliminarRolSchema = rolIdParamSchema
+
+// DTO para asignar rol
+export const asignarRolSchema = rolIdParamSchema
