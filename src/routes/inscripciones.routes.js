@@ -21,6 +21,13 @@ import {
 
 const router = express.Router();
 
+// 2. Consulta de trámites (requiere rol Administrador)
+router.get(
+  "/",
+  ...soloAdmin(),
+  validarConsulta(consultarInscripcionesSchema),
+  consultarInscripciones
+);
 
 // 1. Postulación pública (abierta a postulantes)
 router.post("/postularse",
@@ -54,15 +61,6 @@ router.post("/postularse",
 */
   validarBody(postularseSchema), postularse
   
-);
-
-
-// 2. Consulta de trámites (requiere rol Administrador)
-router.get(
-  "/",
-  ...soloAdmin(),
-  validarConsulta(consultarInscripcionesSchema),
-  consultarInscripciones
 );
 
 // 3. Evaluar trámite (cambiar estado y opcionalmente asignar/liberar stand)

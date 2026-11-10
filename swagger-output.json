@@ -14,12 +14,222 @@
   "paths": {
     "/": {
       "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Información general de la API",
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/usuarios/": {
+      "get": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Permite a un usuario con rol ADMINISTRADOR consultar usuarios con filtros y paginación.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "busqueda",
+            "in": "query",
+            "description": "Permite buscar usuarios por nombre, apellido, email o cuil",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rol",
+            "in": "query",
+            "description": "Permite filtrar usuarios por rol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activo",
+            "in": "query",
+            "description": "Permite filtrar usuarios por estado activo/inactivo",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "required": false
+          },
+          {
+            "name": "localidadId",
+            "in": "query",
+            "description": "Permite filtrar usuarios por localidad (ID numérico)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordenPor",
+            "in": "query",
+            "description": "Campo por el cual ordenar los resultados",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nombre",
+                "email",
+                "createdAt"
+              ]
+            },
+            "default": "createdAt",
+            "required": false
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "description": "Dirección de ordenamiento",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "default": "asc",
+            "required": false
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Número de página para paginación",
+            "default": 1,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "description": "Cantidad de resultados por página (máx. 50)",
+            "default": 10,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios paginada obtenida con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaUsuariosPaginada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de consulta inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR o cuenta inactiva.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/usuarios/me": {
+      "get": {
+        "tags": [
+          "usuarios"
+        ],
+        "summary": "Obtiene los datos del perfil del usuario actualmente autenticado.",
         "description": "",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Perfil de usuario obtenido con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Token ausente, inválido o expirado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta de usuario se encuentra inhabilitada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/usuarios/login": {
@@ -30,8 +240,8 @@
         "summary": "Permite a un usuario iniciar sesión con una cuenta activa.",
         "description": "",
         "responses": {
-          "201": {
-            "description": "Inscripción creada.",
+          "200": {
+            "description": "Inicio de sesión exitoso.",
             "content": {
               "application/json": {
                 "schema": {
@@ -41,32 +251,28 @@
             }
           },
           "400": {
-            "description": "Cuerpo inválido o Bearer mal formado."
-          },
-          "401": {
-            "description": "Token ausente o inválido.",
+            "description": "Datos enviados inválidos.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorApi"
-                },
-                "example": {
-                  "mensaje": "Se requiere un token de acceso."
                 }
               }
             }
           },
-          "403": {
-            "description": "Cuenta inactiva."
-          },
-          "404": {
-            "description": "Usuario no encontrado."
+          "401": {
+            "description": "Credenciales inválidas o cuenta inactiva.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
-          {
-            "bearerAuth": []
-          }
+          {}
         ],
         "requestBody": {
           "required": true,
@@ -85,40 +291,31 @@
         "tags": [
           "usuarios"
         ],
+        "summary": "Cierra la sesión del usuario revocando el token JWT actual.",
         "description": "",
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Sesión cerrada exitosamente (sin contenido)."
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Formato de autorización inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/usuarios/me": {
-      "get": {
-        "tags": [
-          "usuarios"
-        ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -133,35 +330,65 @@
         "tags": [
           "usuarios"
         ],
+        "summary": "Permite a un ADMINISTRADOR registrar un nuevo usuario administrador.",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Administrador creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, o el email/CUIL ya está registrado, o la localidad no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
-      }
-    },
-    "/api/usuarios/": {
-      "get": {
-        "tags": [
-          "usuarios"
         ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearAdministrador"
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/usuarios/{id}": {
@@ -169,6 +396,7 @@
         "tags": [
           "usuarios"
         ],
+        "summary": "Permite a un ADMINISTRADOR consultar un usuario por su ID (UUID).",
         "description": "",
         "parameters": [
           {
@@ -177,12 +405,61 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID de usuario en formato UUID",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Usuario obtenido con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID de usuario inválido (debe ser un UUID válido).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -197,12 +474,15 @@
         "tags": [
           "usuarios"
         ],
+        "summary": "Permite a un ADMINISTRADOR habilitar o inhabilitar una cuenta de usuario.",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "ID de usuario en formato UUID",
             "required": true,
+            "format": "uuid",
             "schema": {
               "type": "string"
             }
@@ -210,14 +490,81 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Estado de activación actualizado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioActivoActualizado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros o cuerpo inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: No se puede desactivar al único administrador activo del sistema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CambiarActivo"
+              }
+            }
+          }
+        }
       }
     },
     "/api/usuarios/{id}/roles": {
@@ -225,12 +572,15 @@
         "tags": [
           "usuarios"
         ],
+        "summary": "Permite a un ADMINISTRADOR asignar un rol adicional a un usuario.",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "ID de usuario en formato UUID",
             "required": true,
+            "format": "uuid",
             "schema": {
               "type": "string"
             }
@@ -238,19 +588,77 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rol asignado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El rol indicado no existe o datos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente o inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsignarRol"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
           "usuarios"
         ],
+        "summary": "Permite a un ADMINISTRADOR retirar un rol específico a un usuario.",
         "description": "",
         "parameters": [
           {
@@ -259,30 +667,175 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID del usuario en formato UUID",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rol retirado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros inválidos o el usuario no tiene asignado dicho rol.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario o rol no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: El usuario debe conservar al menos un rol, o no se puede retirar el rol al único administrador del sistema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EliminarRol"
+              }
+            }
+          }
+        }
       }
     },
     "/api/pabellones/": {
       "get": {
         "tags": [
-          "pabellones"
+          "Pabellones"
         ],
+        "summary": "Consulta de pabellones con filtros y paginación (Pública).",
         "description": "",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "query",
+            "description": "Filtrar pabellones por nombre (búsqueda parcial insensible a mayúsculas)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ordenPor",
+            "in": "query",
+            "description": "Campo por el cual ordenar los resultados",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nombre"
+              ]
+            },
+            "default": "nombre",
+            "required": false
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "description": "Dirección de ordenamiento",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "default": "asc",
+            "required": false
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Número de página para paginación",
+            "default": 1,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "description": "Cantidad de resultados por página (máx. 50)",
+            "default": 10,
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lista paginada de pabellones obtenida con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaPabellonesPaginada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de consulta inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -291,26 +844,75 @@
       },
       "post": {
         "tags": [
-          "pabellones"
+          "Pabellones"
         ],
+        "summary": "Crea un nuevo pabellón (Solo Administrador).",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Pabellón creado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PabellonRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos del cuerpo de la petición inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearPabellon"
+              }
+            }
+          }
+        }
       }
     },
     "/api/pabellones/{id}": {
       "get": {
         "tags": [
-          "pabellones"
+          "Pabellones"
         ],
+        "summary": "Obtiene los detalles de un pabellón por su ID (Pública).",
         "description": "",
         "parameters": [
           {
@@ -319,12 +921,41 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID del pabellón en formato UUID",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Detalle del pabellón obtenido con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PabellonDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID de pabellón inválido (debe ser un UUID válido).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pabellón no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -333,14 +964,17 @@
       },
       "put": {
         "tags": [
-          "pabellones"
+          "Pabellones"
         ],
+        "summary": "Actualiza los datos de un pabellón existente (Solo Administrador).",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "ID del pabellón en formato UUID",
             "required": true,
+            "format": "uuid",
             "schema": {
               "type": "string"
             }
@@ -348,19 +982,77 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Pabellón actualizado con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PabellonRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID o datos del cuerpo de la petición inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pabellón no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarPabellon"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "pabellones"
+          "Pabellones"
         ],
+        "summary": "Elimina un pabellón existente (Solo Administrador).",
         "description": "",
         "parameters": [
           {
@@ -369,12 +1061,71 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "ID del pabellón en formato UUID",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Pabellón eliminado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID de pabellón inválido (debe ser un UUID válido).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token ausente, inválido o revocado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acceso denegado: requiere rol ADMINISTRADOR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pabellón no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: No se puede eliminar el pabellón porque contiene sectores asociados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApi"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1145,6 +1896,24 @@
         ]
       }
     },
+    "/api/inscripciones/": {
+      "get": {
+        "tags": [
+          "inscripciones"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/inscripciones/postularse": {
       "post": {
         "tags": [
@@ -1204,24 +1973,6 @@
         }
       }
     },
-    "/api/inscripciones/": {
-      "get": {
-        "tags": [
-          "inscripciones"
-        ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
     "/api/inscripciones/{id}/estado": {
       "patch": {
         "tags": [
@@ -1260,6 +2011,157 @@
       }
     },
     "schemas": {
+      "ActualizarPabellon": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "descripcion": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "additionalProperties": false,
+        "example": {
+          "nombre": "Pabellón Artesanías y Diseño",
+          "descripcion": "Espacio renovado para exposiciones textiles y diseño contemporáneo."
+        }
+      },
+      "AsignarRol": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "nombre": "ADMINISTRADOR"
+        }
+      },
+      "CambiarActivo": {
+        "type": "object",
+        "properties": {
+          "activo": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "activo"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "activo": true
+        }
+      },
+      "CrearAdministrador": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 2
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 2
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "cuil": {
+            "type": "string",
+            "pattern": "^\\d{2}-\\d{8}-\\d$"
+          },
+          "sexo": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F"
+            ]
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "description": "Tipo de dato no representable en OpenAPI 3.0, se serializa como string."
+          },
+          "localidadId": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          }
+        },
+        "required": [
+          "nombre",
+          "apellido",
+          "email",
+          "password",
+          "cuil",
+          "sexo",
+          "fechaNacimiento",
+          "localidadId"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "nombre": "Carlos",
+          "apellido": "González",
+          "email": "carlos.admin@poncho.gob.ar",
+          "password": "PasswordSeguro2026!",
+          "cuil": "20-30123456-7",
+          "sexo": "M",
+          "fechaNacimiento": "1988-05-14T00:00:00Z",
+          "localidadId": "10049030"
+        }
+      },
+      "CrearPabellon": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "descripcion": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "nombre"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "nombre": "Pabellón Artesanías Tradicionales",
+          "descripcion": "Espacio dedicado a artesanos tradicionales del telar, madera y cuero."
+        }
+      },
+      "EliminarRol": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
       "ErrorApi": {
         "type": "object",
         "required": [
@@ -1292,6 +2194,102 @@
         "example": {
           "email": "admin@poncho.com",
           "password": "ContraseñaSegura2026!"
+        }
+      },
+      "ListaPabellonesPaginada": {
+        "type": "object",
+        "required": [
+          "pabellones",
+          "paginacion"
+        ],
+        "properties": {
+          "pabellones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PabellonDetalle"
+            }
+          },
+          "paginacion": {
+            "type": "object",
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ],
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "example": 1
+              },
+              "limite": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 12
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "example": 2
+              }
+            }
+          }
+        }
+      },
+      "ListaUsuariosPaginada": {
+        "type": "object",
+        "required": [
+          "usuarios",
+          "paginacion"
+        ],
+        "properties": {
+          "usuarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UsuarioDetalle"
+            }
+          },
+          "paginacion": {
+            "type": "object",
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ],
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "example": 1
+              },
+              "limite": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 45
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "example": 5
+              }
+            }
+          }
+        }
+      },
+      "MensajeRespuesta": {
+        "type": "object",
+        "required": [
+          "mensaje"
+        ],
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "example": "Operación realizada exitosamente."
+          }
         }
       },
       "NuevaPostulacion": {
@@ -1382,6 +2380,79 @@
           }
         }
       },
+      "PabellonDetalle": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "sectores"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "c1f7b876-0f79-4d2b-a0ea-75a7c2b42901"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Pabellón Artesanías Tradicionales"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "example": "Espacio dedicado a artesanos tradicionales."
+          },
+          "sectores": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "nombre"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "e4f8d910-1a2b-3c4d-5e6f-7a8b9c0d1e2f"
+                },
+                "nombre": {
+                  "type": "string",
+                  "example": "Sector A"
+                },
+                "descripcion": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Área de exposición textil"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PabellonRespuesta": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "c1f7b876-0f79-4d2b-a0ea-75a7c2b42901"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Pabellón Artesanías Tradicionales"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "example": "Espacio dedicado a artesanos tradicionales."
+          }
+        }
+      },
       "PostulacionCreada": {
         "type": "object",
         "required": [
@@ -1462,6 +2533,40 @@
           }
         }
       },
+      "UsuarioActivoActualizado": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "apellido",
+          "email",
+          "activo"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Juan"
+          },
+          "apellido": {
+            "type": "string",
+            "example": "Pérez"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "juan@ejemplo.com"
+          },
+          "activo": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
       "UsuarioAutenticado": {
         "type": "object",
         "required": [
@@ -1509,7 +2614,174 @@
             "type": "string"
           }
         }
+      },
+      "UsuarioDetalle": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre",
+          "apellido",
+          "cuil",
+          "fechaNacimiento",
+          "sexo",
+          "email",
+          "activo",
+          "createdAt",
+          "roles"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Juan"
+          },
+          "apellido": {
+            "type": "string",
+            "example": "Pérez"
+          },
+          "cuil": {
+            "type": "string",
+            "example": "20-12345678-9"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "format": "date-time",
+            "example": "1995-04-12T00:00:00.000Z"
+          },
+          "sexo": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F"
+            ],
+            "example": "M"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "usuario@ejemplo.com"
+          },
+          "activo": {
+            "type": "boolean",
+            "example": true
+          },
+          "ultimoAcceso": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2026-11-10T02:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-15T14:30:00.000Z"
+          },
+          "localidad": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 10049030
+              },
+              "nombre": {
+                "type": "string",
+                "example": "San Fernando del Valle de Catamarca"
+              },
+              "departamento": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "example": 10049
+                  },
+                  "nombre": {
+                    "type": "string",
+                    "example": "Capital"
+                  },
+                  "provincia": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 10
+                      },
+                      "nombre": {
+                        "type": "string",
+                        "example": "Catamarca"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "ADMINISTRADOR"
+            ]
+          },
+          "emprendimiento": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              },
+              "nombre": {
+                "type": "string",
+                "example": "Tejidos del Valle"
+              },
+              "rubro": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "nombre": {
+                    "type": "string",
+                    "example": "Textil"
+                  }
+                }
+              },
+              "stand": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "nombre": {
+                    "type": "string",
+                    "example": "Stand A-12"
+                  },
+                  "estado": {
+                    "type": "string",
+                    "example": "ASIGNADO"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }
