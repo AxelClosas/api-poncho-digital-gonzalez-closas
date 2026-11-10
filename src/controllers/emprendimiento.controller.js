@@ -47,11 +47,11 @@ export const actualizar = async (req, res, next) => {
     try {
 
         const emprendimiento =
-        await emprendimientoService.actualizarEmprendimiento(
-            req.parametrosValidados.id,
-            req.bodyValidado,
-            req.contextoUsuario
-    );
+            await emprendimientoService.actualizarEmprendimiento(
+                req.parametrosValidados?.id,
+                req.bodyValidado,
+                req.contextoUsuario
+            );
 
         return res.status(200).json(emprendimiento);
     } catch (error) {

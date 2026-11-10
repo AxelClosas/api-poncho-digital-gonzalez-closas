@@ -54,7 +54,7 @@ export const postularseSchema = z
 // Schema para consultar y filtrar inscripciones (Admin)
 export const consultarInscripcionesSchema = z.object({
   nroEdicion: z.coerce.number().int().positive().optional(),
-  estadoId: z.coerce.number().int().positive().optional(),
+  estadoId: uuidSchema.optional(),
   busqueda: z.string().trim().optional(), // Buscar por nombre de usuario o emprendimiento
   ordenPor: z.enum(["createdAt", "nroTramite"]).default("createdAt"),
   direccion: z.enum(["asc", "desc"]).default("desc"),

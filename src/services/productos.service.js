@@ -23,6 +23,30 @@ export const crearProducto = async (usuarioId, datos) => {
     );
   }
 
+  const usuarioHabilitado = await prisma.usuario.findFirst({
+    where: { id: usuarioId },
+    select: { habilitado: true }
+  })
+
+  const estadoInscripcion = await prisma.inscripcion.findFirst({
+    where: {
+      usuarioId: usuarioId
+    },
+    select: {
+      estado: {
+        select: {
+          nombre: true
+        }
+      }
+    }
+  })
+
+  console.log("ESTADO DE INSCRIPCIÓN: ", estadoInscripcion.estado.nombre)
+
+  if (usuarioHabilitado && estadoInscripcion.estado.nombre === "solicitud_cambio") {
+    throw crearError("Cuenta no habilitada para agregar productos. Si considera que es un error, consulte con un administrador del sistema.", 403)
+  }
+
   // 2. Creamos el producto asociado
   return prisma.producto.create({
     data: {
@@ -111,9 +135,11 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
   // Comprobamos existencia y pertenencia
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento : {
-      select: { usuarioId: true }
-    } },
+    include: {
+      emprendimiento: {
+        select: { usuarioId: true }
+      }
+    },
   });
 
   if (!producto) {
@@ -134,9 +160,11 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
 export const eliminarProducto = async (productoId, usuarioId) => {
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento: {
-      select: { usuarioId: true }
-    } },
+    include: {
+      emprendimiento: {
+        select: { usuarioId: true }
+      }
+    },
   });
 
   if (!producto) {

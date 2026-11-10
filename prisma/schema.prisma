@@ -6,30 +6,30 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
-  previewFeatures = ["relationJoins"] // Con esta feat se activa el uso de joins en las consultas
+  // previewFeatures = ["relationJoins"] // Con esta feat se activa el uso de joins en las consultas
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model Pabellon{
-  id         String   @id @default(uuid()) @db.Uuid
-  nombre     String   
+model Pabellon {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String
   descripcion String?
 
-  sectores   Sector[]
+  sectores Sector[]
 }
 
-model Sector{
-  id        String   @id @default(uuid()) @db.Uuid
-  nombre     String   
+model Sector {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String
   descripcion String?
 
-  pabellonId  String @db.Uuid
-  pabellon    Pabellon @relation(fields: [pabellonId], references: [id], onDelete: Restrict)
+  pabellonId String   @db.Uuid
+  pabellon   Pabellon @relation(fields: [pabellonId], references: [id], onDelete: Restrict)
 
-  stands     Stand[]
+  stands Stand[]
 }
 
 enum EstadoStand {
@@ -38,52 +38,52 @@ enum EstadoStand {
 }
 
 model Stand {
-  id        String   @id @default(uuid()) @db.Uuid
-  nombre    String   
-  estado    EstadoStand   @default(DISPONIBLE)
+  id     String      @id @default(uuid()) @db.Uuid
+  nombre String
+  estado EstadoStand @default(DISPONIBLE)
 
-  sectorId  String @db.Uuid
-  sector    Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  sectorId String @db.Uuid
+  sector   Sector @relation(fields: [sectorId], references: [id], onDelete: Restrict)
 
   emprendimiento Emprendimiento?
 }
 
-model Emprendimiento{
-  id            String     @id @default(uuid()) @db.Uuid
-  nombre        String   
-  descripcion   String?
+model Emprendimiento {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String
+  descripcion String?
 
-  usuarioId     String @unique @db.Uuid
-  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId String  @unique @db.Uuid
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
-  standId       String?     @unique @db.Uuid
-  stand         Stand?   @relation(fields: [standId], references: [id], onDelete: SetNull)
+  standId String? @unique @db.Uuid
+  stand   Stand?  @relation(fields: [standId], references: [id], onDelete: SetNull)
 
-  rubroId         String? @db.Uuid
-  rubro           Rubro?      @relation(fields: [rubroId], references: [id], onDelete: SetNull)
+  rubroId String? @db.Uuid
+  rubro   Rubro?  @relation(fields: [rubroId], references: [id], onDelete: SetNull)
 
-  productos     Producto[]
+  productos Producto[]
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Producto{
-  id String @id @default(uuid()) @db.Uuid
-  nombre String
+model Producto {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String
   descripcion String?
-  precio Decimal @db.Decimal(10, 2)
-  
-  emprendimientoId String @db.Uuid
+  precio      Decimal @db.Decimal(10, 2)
+
+  emprendimientoId String         @db.Uuid
   emprendimiento   Emprendimiento @relation(fields: [emprendimientoId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Rubro{
-  id        String      @id @default(uuid()) @db.Uuid
-  nombre     String  @unique 
+model Rubro {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String  @unique
   descripcion String?
 
   emprendimientos Emprendimiento[]
@@ -91,88 +91,89 @@ model Rubro{
 
 // Axel
 model Usuario {
-  id              String     @id @default(uuid()) @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
   nombre          String
   apellido        String
-  cuil            String     @unique
+  cuil            String   @unique
   fechaNacimiento DateTime
   sexo            String
 
-  localidadId     BigInt
-  
-  emprendimiento  Emprendimiento? 
+  localidadId BigInt
+
+  habilitado     Boolean         @default(false)
+  emprendimiento Emprendimiento?
 
   // Datos de usuario
-  email           String     @unique
-  passwordHash    String
+  email        String @unique
+  passwordHash String
 
-  activo          Boolean   @default(true)
-  ultimoAcceso    DateTime?
+  activo       Boolean   @default(true)
+  ultimoAcceso DateTime?
 
-  localidad       Localidad       @relation(fields: [localidadId], references: [id], onDelete: Restrict)
-  
-  inscripciones   Inscripcion[]   @relation("Realiza")
-  evaluaciones    Inscripcion[]   @relation("Evalua")
+  localidad Localidad @relation(fields: [localidadId], references: [id], onDelete: Restrict)
 
-  roles           UsuarioRol[]
+  inscripciones Inscripcion[] @relation("Realiza")
+  evaluaciones  Inscripcion[] @relation("Evalua")
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  roles UsuarioRol[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Rol {
-  id        String     @id @default(uuid()) @db.Uuid
-  nombre    String         @unique
+  id     String @id @default(uuid()) @db.Uuid
+  nombre String @unique
 
-  usuarios  UsuarioRol[]
+  usuarios UsuarioRol[]
 }
 
 model UsuarioRol {
-  usuarioId String  @db.Uuid
+  usuarioId String @db.Uuid
   rolId     String @db.Uuid
 
-  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Restrict)
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rol     Rol     @relation(fields: [rolId], references: [id], onDelete: Restrict)
 
   @@id([usuarioId, rolId])
 }
 
 model Inscripcion {
-  id                String     @id        @default(uuid()) @db.Uuid
-  nroTramite        String        @unique    @default(uuid()) @db.Uuid
+  id         String @id @default(uuid()) @db.Uuid
+  nroTramite String @unique @default(uuid()) @db.Uuid
 
-  nroEdicion        Int
+  nroEdicion Int
 
-  usuarioId         String     @db.Uuid
-  usuario           Usuario    @relation("Realiza", fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId String  @db.Uuid
+  usuario   Usuario @relation("Realiza", fields: [usuarioId], references: [id], onDelete: Cascade)
 
-  evaluadorId       String?    @db.Uuid
-  evaluador         Usuario?   @relation("Evalua", fields: [evaluadorId], references: [id], onDelete: SetNull)
+  evaluadorId String?  @db.Uuid
+  evaluador   Usuario? @relation("Evalua", fields: [evaluadorId], references: [id], onDelete: SetNull)
 
-  estadoId          String     @db.Uuid
-  estado            Estado   @relation(fields: [estadoId], references: [id], onDelete: Restrict)
+  estadoId String @db.Uuid
+  estado   Estado @relation(fields: [estadoId], references: [id], onDelete: Restrict)
 
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Estado {
-  id              String        @id       @default(uuid()) @db.Uuid
-  nombre          String        @unique
+  id     String @id @default(uuid()) @db.Uuid
+  nombre String @unique
 
-  inscripciones     Inscripcion[]
+  inscripciones Inscripcion[]
 }
 
 model Provincia {
-  id        Int      @id
-  nombre    String   @unique
+  id     Int    @id
+  nombre String @unique
 
   departamentos Departamento[]
 }
 
 model Departamento {
-  id        Int      @id
-  nombre    String
+  id     Int    @id
+  nombre String
 
   provinciaId Int
   provincia   Provincia @relation(fields: [provinciaId], references: [id], onDelete: Restrict)
@@ -181,13 +182,13 @@ model Departamento {
 }
 
 model Localidad {
-  id        BigInt      @id
-  nombre    String
+  id     BigInt @id
+  nombre String
 
   departamentoId Int
   departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
 
-  usuarios  Usuario[]
+  usuarios Usuario[]
 }
 
 model TokenRevocado {

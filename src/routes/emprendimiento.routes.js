@@ -17,7 +17,7 @@ import {
     validarBody,
     validarParametros,
     validarConsulta,
-}from "../middlewares/validacion.middleware.js";   
+} from "../middlewares/validacion.middleware.js";
 
 import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
 
@@ -38,14 +38,15 @@ const artesanoOAdmin = [
 //lecura publica
 router.get("/", validarConsulta(consultarEmprendimientosSchema), obtenerTodos);
 
-router.get("/:id", validarParametros (emprendimientoIdParamSchema), obtenerPorId);
-//Creacion Administrativa
-/*router.post(
-    "/",
-    ...soloAdmin,
-    validarBody(crearEmprendimientoSchema),
-    crear
-);*/
+router.get("/:id", validarParametros(emprendimientoIdParamSchema), obtenerPorId);
+
+// Crear nuevo emprendimiento implica crear un nuevo registro de postulación recuperando los datos
+// router.post(
+//     "/",
+//     ...soloAdmin,
+//     validarBody(crearEmprendimientoSchema),
+//     crear
+// );
 
 //Actualizacion del propietario o de un administrador
 router.patch(

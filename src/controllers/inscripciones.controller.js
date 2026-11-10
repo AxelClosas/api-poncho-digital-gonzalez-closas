@@ -20,7 +20,7 @@ export const consultarInscripciones = async (req, res, next) => {
 
 export const cambiarEstadoInscripcion = async (req, res, next) => {
   try {
-    const evaluadorId = req.usuario?.id; // Inyectado por autenticarUsuario
+    const evaluadorId = req.contextoUsuario?.id ?? req.usuario?.id;
     const inscripcion = await inscripcionesService.cambiarEstadoInscripcion(
       req.parametrosValidados.id,
       req.bodyValidado,
