@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { secretoJWT } from "../config/jwt.js";
+import { secretoJWT, expJWT } from "../config/jwt.js";
 
 export const generarToken = (usuario) => {
   return jwt.sign(
@@ -9,7 +9,7 @@ export const generarToken = (usuario) => {
     secretoJWT,
     {
       algorithm: "HS256",
-      expiresIn: "15m",
+      expiresIn: expJWT,
     }
   );
 };
