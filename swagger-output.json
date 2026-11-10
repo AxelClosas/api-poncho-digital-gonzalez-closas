@@ -1138,12 +1138,20 @@
     "/api/stands/": {
       "get": {
         "tags": [
-          "stands"
+          "Stands"
         ],
-        "description": "",
+        "summary": "Lista los stands con el nombre de su sector y pabellón.",
+        "description": "Devuelve un arreglo sin paginación. Esta consulta no devuelve IDs ni estado.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Listado de stands.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaStands"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1152,26 +1160,54 @@
       },
       "post": {
         "tags": [
-          "stands"
+          "Stands"
         ],
-        "description": "",
+        "summary": "Crea un stand. Requiere rol ADMINISTRADOR.",
+        "description": "Actualmente el servicio crea el stand como DISPONIBLE aunque se envíe otro estado.",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Stand creado con su sector.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, sector inexistente o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearStand"
+              }
+            }
+          }
+        }
       }
     },
     "/api/stands/{id}": {
       "get": {
         "tags": [
-          "stands"
+          "Stands"
         ],
+        "summary": "Obtiene un stand por UUID, incluyendo su sector.",
         "description": "",
         "parameters": [
           {
@@ -1179,13 +1215,27 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Detalle del stand.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido."
+          },
+          "404": {
+            "description": "Stand no encontrado."
           }
         },
         "security": [
@@ -1194,34 +1244,66 @@
       },
       "put": {
         "tags": [
-          "stands"
+          "Stands"
         ],
-        "description": "",
+        "summary": "Actualiza un stand. Requiere rol ADMINISTRADOR.",
+        "description": "Todos los campos del cuerpo son opcionales.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Stand actualizado con su sector.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos o UUID inválidos, sector inexistente o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Stand no encontrado."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarStand"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "stands"
+          "Pabellones"
         ],
+        "summary": "Elimina un pabellón. Requiere rol ADMINISTRADOR.",
         "description": "",
         "parameters": [
           {
@@ -1229,13 +1311,36 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Pabellón eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Pabellón no encontrado."
+          },
+          "409": {
+            "description": "El pabellón contiene sectores asociados."
           }
         },
         "security": [
@@ -1248,12 +1353,81 @@
     "/api/sectores/": {
       "get": {
         "tags": [
-          "sectores"
+          "Sectores"
         ],
+        "summary": "Consulta sectores con filtros y paginación.",
         "description": "",
+        "parameters": [
+          {
+            "name": "nombre",
+            "in": "query",
+            "description": "Búsqueda parcial por nombre, sin distinguir mayúsculas.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "ordenPor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nombre"
+              ],
+              "default": "nombre"
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Listado paginado de sectores.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaSectoresPaginada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de consulta inválidos."
           }
         },
         "security": [
@@ -1262,26 +1436,54 @@
       },
       "post": {
         "tags": [
-          "sectores"
+          "Sectores"
         ],
+        "summary": "Crea un sector. Requiere rol ADMINISTRADOR.",
         "description": "",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Sector creado con su pabellón.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, pabellón inexistente o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearSector"
+              }
+            }
+          }
+        }
       }
     },
     "/api/sectores/{id}": {
       "get": {
         "tags": [
-          "sectores"
+          "Sectores"
         ],
+        "summary": "Obtiene un sector con su pabellón y sus stands.",
         "description": "",
         "parameters": [
           {
@@ -1289,13 +1491,27 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Detalle del sector.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorDetalle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido."
+          },
+          "404": {
+            "description": "Sector no encontrado."
           }
         },
         "security": [
@@ -1304,34 +1520,66 @@
       },
       "put": {
         "tags": [
-          "sectores"
+          "Sectores"
         ],
-        "description": "",
+        "summary": "Actualiza un sector. Requiere rol ADMINISTRADOR.",
+        "description": "Todos los campos del cuerpo son opcionales.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Sector actualizado con su pabellón.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos o UUID inválidos, pabellón inexistente o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Sector no encontrado."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarSector"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "sectores"
+          "Sectores"
         ],
+        "summary": "Elimina un sector. Requiere rol ADMINISTRADOR.",
         "description": "",
         "parameters": [
           {
@@ -1339,13 +1587,36 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Sector eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Sector no encontrado."
+          },
+          "409": {
+            "description": "El sector contiene stands asociados."
           }
         },
         "security": [
@@ -1543,12 +1814,29 @@
     "/api/roles/": {
       "get": {
         "tags": [
-          "roles"
+          "Roles"
         ],
-        "description": "",
+        "summary": "Lista los roles. Requiere rol ADMINISTRADOR.",
+        "description": "Devuelve un arreglo ordenado por nombre ascendente, sin paginación.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Listado de roles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaRoles"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de autorización inválido."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
           }
         },
         "security": [
@@ -1559,40 +1847,92 @@
       },
       "post": {
         "tags": [
-          "roles"
+          "Roles"
         ],
-        "description": "",
+        "summary": "Crea un rol. Requiere rol ADMINISTRADOR.",
+        "description": "El nombre se guarda en mayúsculas y debe ser único.",
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Rol creado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RolRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo inválido o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "409": {
+            "description": "Ya existe un rol con ese nombre."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearRol"
+              }
+            }
+          }
+        }
       }
     },
     "/api/roles/{id}": {
       "get": {
         "tags": [
-          "roles"
+          "Roles"
         ],
+        "summary": "Obtiene un rol por UUID. Requiere rol ADMINISTRADOR.",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "UUID del rol.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Detalle del rol.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RolRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UUID inválido o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Rol no encontrado."
           }
         },
         "security": [
@@ -1603,48 +1943,101 @@
       },
       "put": {
         "tags": [
-          "roles"
+          "Roles"
         ],
-        "description": "",
+        "summary": "Actualiza un rol. Requiere rol ADMINISTRADOR.",
+        "description": "El nombre es obligatorio y se guarda en mayúsculas.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "UUID del rol que se desea actualizar.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Rol actualizado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RolRespuesta"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo o UUID inválidos, o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Rol no encontrado."
+          },
+          "409": {
+            "description": "Ya existe otro rol con ese nombre."
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarRol"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "roles"
+          "Roles"
         ],
-        "description": "",
+        "summary": "Elimina un rol. Requiere rol ADMINISTRADOR.",
+        "description": "Solo se pueden eliminar roles que no estén asignados a usuarios.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "UUID del rol que se desea eliminar.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Rol eliminado correctamente. Sin cuerpo de respuesta."
+          },
+          "400": {
+            "description": "UUID inválido o autorización mal formada."
+          },
+          "401": {
+            "description": "Token ausente, inválido, vencido o revocado."
+          },
+          "403": {
+            "description": "Cuenta inactiva o sin rol ADMINISTRADOR."
+          },
+          "404": {
+            "description": "Rol no encontrado."
+          },
+          "409": {
+            "description": "No se puede eliminar el rol porque está asignado a usuarios."
           }
         },
         "security": [
@@ -2031,6 +2424,92 @@
           "descripcion": "Espacio renovado para exposiciones textiles y diseño contemporáneo."
         }
       },
+      "ActualizarProducto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Poncho artesanal"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "example": "Tejido a mano con lana de oveja."
+          },
+          "precio": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 99999999.99,
+            "example": 45000.5
+          }
+        }
+      },
+      "ActualizarRol": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "description": "Se eliminan espacios de los extremos y se convierte a mayusculas.",
+            "example": "ARTESANO"
+          }
+        }
+      },
+      "ActualizarSector": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Sector Textiles"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "example": "Espacio para tejidos artesanales."
+          },
+          "pabellonId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ActualizarStand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Stand A2"
+          },
+          "sectorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "DISPONIBLE",
+              "OCUPADO"
+            ],
+            "example": "DISPONIBLE"
+          }
+        }
+      },
       "AsignarRol": {
         "type": "object",
         "properties": {
@@ -2148,6 +2627,104 @@
           "descripcion": "Espacio dedicado a artesanos tradicionales del telar, madera y cuero."
         }
       },
+      "CrearProducto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "precio"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Poncho artesanal"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "example": "Tejido a mano con lana de oveja."
+          },
+          "precio": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 99999999.99,
+            "example": 45000.5
+          }
+        }
+      },
+      "CrearRol": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50,
+            "description": "Se eliminan espacios de los extremos y se convierte a mayusculas.",
+            "example": "ARTESANO"
+          }
+        }
+      },
+      "CrearSector": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "pabellonId"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Sector Textiles"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "example": "Espacio para tejidos artesanales."
+          },
+          "pabellonId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "CrearStand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "sectorId"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Stand A1"
+          },
+          "sectorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "DISPONIBLE",
+              "OCUPADO"
+            ],
+            "description": "El validador acepta este campo, pero actualmente el servicio de creación lo ignora y utiliza DISPONIBLE."
+          }
+        }
+      },
       "EliminarRol": {
         "type": "object",
         "properties": {
@@ -2233,6 +2810,142 @@
               "totalPaginas": {
                 "type": "integer",
                 "example": 2
+              }
+            }
+          }
+        }
+      },
+      "ListaProductosPaginada": {
+        "type": "object",
+        "properties": {
+          "productos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoDetalle"
+            }
+          },
+          "paginacion": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "example": 1
+              },
+              "limite": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 25
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "example": 3
+              }
+            }
+          }
+        }
+      },
+      "ListaRoles": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RolRespuesta"
+        }
+      },
+      "ListaSectoresPaginada": {
+        "type": "object",
+        "properties": {
+          "sectores": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "nombre": {
+                  "type": "string"
+                },
+                "pabellon": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nombre": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "stands": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "paginacion": {
+            "type": "object",
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "example": 1
+              },
+              "limite": {
+                "type": "integer",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "example": 20
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "example": 2
+              }
+            }
+          }
+        }
+      },
+      "ListaStands": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "nombre": {
+              "type": "string",
+              "example": "Stand A1"
+            },
+            "sector": {
+              "type": "object",
+              "properties": {
+                "nombre": {
+                  "type": "string",
+                  "example": "Sector Textiles"
+                },
+                "pabellon": {
+                  "type": "object",
+                  "properties": {
+                    "nombre": {
+                      "type": "string",
+                      "example": "Pabellón Artesanías"
+                    }
+                  }
+                }
               }
             }
           }
@@ -2532,6 +3245,206 @@
             }
           }
         }
+      },
+      "Producto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Poncho artesanal"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "string",
+            "example": "45000.5"
+          },
+          "emprendimientoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductoDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Producto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "emprendimiento": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "rubro": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "stand": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      },
+                      "estado": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RolRespuesta": {
+        "type": "object",
+        "required": [
+          "id",
+          "nombre"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "ARTESANO"
+          }
+        }
+      },
+      "SectorDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SectorRespuesta"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "stands": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StandBase"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "SectorRespuesta": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Sector Textiles"
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "pabellonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pabellon": {
+            "$ref": "#/components/schemas/PabellonRespuesta"
+          }
+        }
+      },
+      "StandBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Stand A1"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "DISPONIBLE",
+              "OCUPADO"
+            ]
+          },
+          "sectorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "StandDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StandBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "sector": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "descripcion": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "pabellonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "UsuarioActivoActualizado": {
         "type": "object",
