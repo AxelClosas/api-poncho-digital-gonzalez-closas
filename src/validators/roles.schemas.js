@@ -18,29 +18,6 @@ export const crearRolSchema = z
 
 export const actualizarRolSchema = crearRolSchema;
 
-export const RolRespuesta = {
-  type: "object",
-  required: ["id", "nombre"],
-  properties: {
-    id: {
-      type: "string",
-      format: "uuid",
-      example: "f49b6ec8-4138-4e98-901d-e371fbdd0c46"
-    },
-    nombre: {
-      type: "string",
-      example: "ARTESANO"
-    }
-  }
-};
-
-export const ListaRoles = {
-  type: "array",
-  items: {
-    $ref: "#/components/schemas/RolRespuesta"
-  }
-};
-
 export const eliminarRolSchema = rolIdParamSchema
 
 // DTO para asignar rol
