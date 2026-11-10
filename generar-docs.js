@@ -18,7 +18,8 @@ const doc = {
       bearerFormat: "JWT" }
     },
     "@schemas": esquemas
-  }
+  },
+  security: [{ bearerAuth: [] }]
 };
 
 const ruta = (archivo) => fileURLToPath(new URL(archivo, import.meta.url)).replaceAll("\\", "/");
