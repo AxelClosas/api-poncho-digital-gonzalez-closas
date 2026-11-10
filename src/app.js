@@ -27,8 +27,31 @@ app.use(express.json());
 
 app.use("/api", indexRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ mensaje: 'API Funcionando' })
+app.get('/',
+  /*
+  #swagger.auto = false
+  #swagger.tags = ["General"]
+  #swagger.summary = "Información general de la API"
+  */
+  (req, res) => {
+  res.json({
+    "nombre": "API Poncho Digital",
+    "version": "1.0.0",
+    "descripcion": "API REST para la gestión del Festival del Poncho",
+    "documentacion": "/docs",
+    "endpoints": {
+      "usuarios": "/api/usuarios",
+      "rubros": "/api/rubros",
+      "pabellones": "/api/pabellones",
+      "stands": "/api/stands",
+      "sectores": "/api/sectores",
+      "emprendimientos": "/api/emprendimientos",
+      "productos": "/api/productos",
+      "inscripciones": "/api/inscripciones",
+      "roles": "/api/roles",
+      "estados": "/api/estados"
+    }
+  })
 })
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
