@@ -75,7 +75,7 @@ export const crearAdministrador = async (dto) => {
   }
 
   const rolAdmin = await prisma.rol.findFirst({
-    where: { nombre: { contains: "ADMINISTRADOR", mode: "insensitive"} },
+    where: { nombre: { contains: "ADMINISTRADOR", mode: "insensitive" } },
   });
   if (!rolAdmin) {
     throw crearError("El rol ADMINISTRADOR no está configurado en el sistema.", 500);
@@ -110,13 +110,22 @@ export const iniciarSesion = async (dto) => {
   const usuario = await prisma.usuario.findUnique({
     where: { email },
     include: {
-      roles: { include: { rol: true } },
+      roles: {
+        select:
+        {
+          rol: {
+            select: { nombre: true }
+          }
+        }
+      },
     },
   });
 
   if (!usuario) {
     throw crearError("Las credenciales son inválidas.", 401);
   }
+
+  console.log(usuario)
 
   const passwordValida = await bcrypt.compare(password, usuario.passwordHash);
   if (!passwordValida) {
@@ -132,7 +141,7 @@ export const iniciarSesion = async (dto) => {
 
   await prisma.usuario.update({
     where: { id: usuario.id },
-    data: { ultimoAcceso: new Date(), activo: true },
+    data: { ultimoAcceso: new Date() }
   });
 
   return {
@@ -149,7 +158,7 @@ export const consultarUsuarios = async (criterios) => {
 
   const where = {};
 
-  if (activo !== undefined) where.activo = activo;
+  if (activo !== undefined) where.activo = Boolean(activo);
   if (localidadId !== undefined) where.localidadId = localidadId;
 
   if (busqueda) {
@@ -246,17 +255,16 @@ export const cambiarEstadoActivo = async (usuarioId, nuevoEstadoActivo) => {
   });
 };
 
-export const agregarRolAUsuario = async (usuarioId, nombreRol) => {
-  console.log("NOMBRE ROL: ", nombreRol);
+export const agregarRolAUsuario = async (usuarioId, rolId) => {
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.findUnique({ where: { id: usuarioId } });
     if (!usuario) {
       throw crearError(`Usuario con ID ${usuarioId} no encontrado.`, 404);
     }
 
-    const rol = await tx.rol.findFirst({ where: { nombre: { contains: nombreRol, mode: "insensitive" } } });
+    const rol = await tx.rol.findFirst({ where: { id: rolId } });
     if (!rol) {
-      throw crearError(`El rol ${nombreRol} no existe.`, 400);
+      throw crearError(`El rol con Id ${rolId} no existe.`, 400);
     }
 
     await tx.usuarioRol.upsert({
@@ -267,32 +275,44 @@ export const agregarRolAUsuario = async (usuarioId, nombreRol) => {
       create: { usuarioId, rolId: rol.id },
     });
 
-    return { mensaje: `Rol ${nombreRol} asignado exitosamente.` };
+    return { mensaje: `Rol ${rol.nombre} asignado exitosamente.` };
   });
 };
 
-export const retirarRolDeUsuario = async (usuarioId, nombreRol) => {
+export const retirarRolDeUsuario = async (usuarioId, rolId) => {
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.findUnique({
       where: { id: usuarioId },
-      include: { roles: { include: { rol: true } } },
+      include: {
+        roles: {
+          include: { rol: true },
+        },
+      },
     });
 
     if (!usuario) {
       throw crearError(`Usuario con ID ${usuarioId} no encontrado.`, 404);
     }
 
-    const rolAsignado = usuario.roles.find((r) => r.rol.nombre === nombreRol);
-    if (!rolAsignado) {
-      throw crearError(`El usuario no tiene asignado el rol ${nombreRol}.`, 400);
+    let rol = null;
+    if (rolId) {
+      rol = await tx.rol.findUnique({
+        where: { id: rolId },
+      });
+      if (!rol) {
+        throw crearError(`Rol con ID ${rolId} no encontrado.`, 404);
+      }
+    } else {
+      throw crearError("Debe especificar el ID o nombre del rol a retirar.", 400);
     }
 
-    if (usuario.roles.length === 1) {
-      throw crearError("El usuario debe conservar al menos un rol.", 409);
+    const tieneRol = usuario.roles.some((r) => r.rolId === rol.id);
+    if (!tieneRol) {
+      throw crearError(`El usuario no tiene asignado el rol: ${rol.nombre}.`, 400);
     }
 
-    if (nombreRol === "ADMINISTRADOR" && usuario.activo) {
-      const otrosAdmins = await tx.usuario.count({
+    if (rol.nombre === "ADMINISTRADOR") {
+      const otrosAdminsActivos = await tx.usuario.count({
         where: {
           id: { not: usuarioId },
           activo: true,
@@ -300,17 +320,28 @@ export const retirarRolDeUsuario = async (usuarioId, nombreRol) => {
         },
       });
 
-      if (otrosAdmins === 0) {
-        throw crearError("No se puede retirar el rol al único administrador activo.", 409);
+      if (usuario.activo && otrosAdminsActivos === 0) {
+        throw crearError("No se puede retirar el rol al único administrador activo del sistema.", 409);
+      }
+
+      const otrosAdminsTotal = await tx.usuario.count({
+        where: {
+          id: { not: usuarioId },
+          roles: { some: { rol: { nombre: "ADMINISTRADOR" } } },
+        },
+      });
+
+      if (otrosAdminsTotal === 0) {
+        throw crearError("No se puede retirar el rol al único administrador del sistema.", 409);
       }
     }
 
     await tx.usuarioRol.delete({
       where: {
-        usuarioId_rolId: { usuarioId, rolId: rolAsignado.rolId },
+        usuarioId_rolId: { usuarioId: usuario.id, rolId: rol.id },
       },
     });
 
-    return { mensaje: `Rol ${nombreRol} retirado exitosamente.` };
+    return { mensaje: `Rol ${rol.nombre} retirado exitosamente.` };
   });
 };

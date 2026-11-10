@@ -25,8 +25,8 @@ const router = Router();
 
 
 // Rutas Públicas (Lectura)
-router.get("/", obtenerTodos);
-router.get("/:id", validarParametros(standIdParamSchema), obtenerPorId);
+router.get("/", /* #swagger.security = [{}] */ obtenerTodos);
+router.get("/:id", /* #swagger.security = [{}] */ validarParametros(standIdParamSchema), obtenerPorId);
 
 // Rutas Protegidas (Gestión)
 router.post(
