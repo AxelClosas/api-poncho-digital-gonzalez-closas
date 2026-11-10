@@ -1,20 +1,8 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js";
 
 export const usuarioIdParamSchema = z
-  .object({
-    id: z.coerce.string().uuid("El ID de usuario debe ser un UUID válido."),
-  })
-  .strict();
-
-export const rolParamSchema = z
-  .object({
-    id: z.coerce.string().uuid("El ID de usuario debe ser un UUID válido."),
-    nombre: z
-      .string()
-      .trim()
-      .min(3)
-      .transform((val) => val.toUpperCase()),
-  })
+  .object({ id: uuidSchema })
   .strict();
 
 // DTO para la creación administrativa de un nuevo Administrador
@@ -91,16 +79,5 @@ export const consultarUsuariosSchema = z.object({
 export const cambiarActivoSchema = z
   .object({
     activo: z.boolean({ required_error: "El campo activo es obligatorio." }),
-  })
-  .strict();
-
-// DTO para asignar rol
-export const asignarRolSchema = z
-  .object({
-    nombre: z
-      .string({ required_error: "El nombre del rol es obligatorio." })
-      .trim()
-      .min(3)
-      .transform((val) => val.toUpperCase()),
   })
   .strict();
