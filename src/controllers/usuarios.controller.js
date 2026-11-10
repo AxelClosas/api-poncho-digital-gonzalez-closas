@@ -69,7 +69,7 @@ export const agregarRol = async (req, res, next) => {
   try {
     const resultado = await usuariosService.agregarRolAUsuario(
       req.parametrosValidados.id,
-      req.bodyValidado.nombre
+      req.bodyValidado.id
     );
     return res.status(200).json(resultado);
   } catch (error) {
@@ -79,10 +79,10 @@ export const agregarRol = async (req, res, next) => {
 
 export const eliminarRol = async (req, res, next) => {
   try {
-    const resultado = await usuariosService.retirarRolDeUsuario(
-      req.parametrosValidados.id,
-      req.parametrosValidados.rol
-    );
+    const usuarioId = req.parametrosValidados.id;
+    const rolId = req.bodyValidado.id;
+
+    const resultado = await usuariosService.retirarRolDeUsuario(usuarioId, rolId);
     return res.status(200).json(resultado);
   } catch (error) {
     return next(error);
