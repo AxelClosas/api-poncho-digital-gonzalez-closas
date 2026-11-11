@@ -1,14 +1,14 @@
 import "dotenv/config";
-import {PrismaPg} from "@prisma/adapter-pg";
-import {PrismaClient} from "../generated/prisma/client.ts";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client.ts";
 
 const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const prisma = new PrismaClient({
-    adapter,
-    log: ["query", "info", "warn", "error"] // Activar LOGS de Prisma
+  adapter,
+  //log: ["query", "info", "warn", "error"] // Activar LOGS de Prisma
 });
 
 export default prisma;
