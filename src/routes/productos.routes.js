@@ -15,6 +15,7 @@ import {
   validarConsulta,
   validarParametros,
 } from "../middlewares/validacion.middleware.js";
+import { registrarTendencia } from "../middlewares/tendencias.middleware.js";
 import {
   crearProductoSchema,
   actualizarProductoSchema,
@@ -105,7 +106,9 @@ router.get("/",
       description: 'Parámetros de consulta inválidos.'
     }
   */
-  validarConsulta(consultarProductosSchema), consultarProductos);
+  validarConsulta(consultarProductosSchema),
+  registrarTendencia("PRODUCTO"),
+  consultarProductos);
 router.get("/:id", 
   /*
   #swagger.auto = false

@@ -11,6 +11,7 @@ import inscripcionesRoutes from "./inscripciones.routes.js";
 import rolesRoutes from "./roles.routes.js";
 import estadosRoutes from "./estados.routes.js";
 import usuariosRoutes from "./usuarios.routes.js";
+import reportesRoutes from "./reportes.routes.js";
 
 
 const router = Router()
@@ -58,6 +59,13 @@ router.use("/inscripciones",
   */
   
   inscripcionesRoutes
+);
+
+router.use("/reportes",
+  /* #swagger.tags = ["Reportes"]
+     #swagger.security = [{ bearerAuth: [] }]
+  */
+  reportesRoutes
 );
 
 export default router
