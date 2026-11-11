@@ -126,8 +126,6 @@ export const iniciarSesion = async (dto) => {
     throw crearError("Las credenciales son inválidas.", 401);
   }
 
-  console.log(usuario)
-
   const passwordValida = await bcrypt.compare(password, usuario.passwordHash);
   if (!passwordValida) {
     throw crearError("Las credenciales son inválidas.", 401);
