@@ -1038,3 +1038,146 @@ export const ListaEstados = {
   type: "array",
   items: { $ref: "#/components/schemas/EstadoRespuesta" },
 };
+
+/* REPORTES Y ESTADÍSTICAS */
+export const ReporteArtesanosRespuesta = {
+  type: "object",
+  required: ["metricas", "artesanos"],
+  properties: {
+    metricas: {
+      type: "object",
+      required: ["totalArtesanos", "habilitados", "inhabilitados", "conEmprendimiento", "sinEmprendimiento"],
+      properties: {
+        totalArtesanos: { type: "integer", example: 45 },
+        habilitados: { type: "integer", example: 42 },
+        inhabilitados: { type: "integer", example: 3 },
+        conEmprendimiento: { type: "integer", example: 40 },
+        sinEmprendimiento: { type: "integer", example: 5 },
+      },
+    },
+    artesanos: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid", example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" },
+          nombreCompleto: { type: "string", example: "Tejerina, Mariana" },
+          email: { type: "string", format: "email", example: "artesano1@poncho.com" },
+          cuil: { type: "string", example: "27351112224" },
+          activo: { type: "boolean", example: true },
+          habilitado: { type: "boolean", example: true },
+          localidad: { type: "string", example: "San Fernando del Valle de Catamarca (Capital)" },
+          emprendimiento: { type: "string", nullable: true, example: "Telares del Valle Calchaquí" },
+          rubro: { type: "string", nullable: true, example: "TEJIDO" },
+          stand: { type: "string", nullable: true, example: "Stand D-01" },
+          fechaRegistro: { type: "string", format: "date-time", example: "2026-11-10T20:00:00.000Z" },
+        },
+      },
+    },
+  },
+};
+
+export const ReporteArtesanosPorLocalidadRespuesta = {
+  type: "array",
+  items: {
+    type: "object",
+    required: ["localidadId", "localidad", "departamento", "provincia", "totalArtesanos"],
+    properties: {
+      localidadId: { type: "string", example: "10049030" },
+      localidad: { type: "string", example: "San Fernando del Valle de Catamarca" },
+      departamento: { type: "string", example: "Capital" },
+      provincia: { type: "string", example: "Catamarca" },
+      totalArtesanos: { type: "integer", example: 18 },
+    },
+  },
+};
+
+export const ReporteArtesanosPorRubroRespuesta = {
+  type: "object",
+  required: ["totalEmprendimientos", "distribucion"],
+  properties: {
+    totalEmprendimientos: { type: "integer", example: 25 },
+    distribucion: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["rubroId", "rubro", "totalEmprendimientos", "porcentaje"],
+        properties: {
+          rubroId: { type: "string", format: "uuid", example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+          rubro: { type: "string", example: "TEJIDO" },
+          descripcion: { type: "string", nullable: true, example: "Tejidos tradicionales del telar" },
+          totalEmprendimientos: { type: "integer", example: 12 },
+          porcentaje: { type: "string", example: "48.0%" },
+        },
+      },
+    },
+  },
+};
+
+export const ReporteOcupacionStandsRespuesta = {
+  type: "object",
+  required: ["totalStands", "disponibles", "ocupados", "porcentajeOcupacion", "porPabellon"],
+  properties: {
+    totalStands: { type: "integer", example: 50 },
+    disponibles: { type: "integer", example: 35 },
+    ocupados: { type: "integer", example: 15 },
+    porcentajeOcupacion: { type: "string", example: "30.0%" },
+    porPabellon: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["pabellonId", "pabellon", "totalStands", "disponibles", "ocupados", "porcentajeOcupacion"],
+        properties: {
+          pabellonId: { type: "string", format: "uuid", example: "c1f7b876-0f79-4d2b-a0ea-75a7c2b42901" },
+          pabellon: { type: "string", example: "Pabellón Poncho Diseño" },
+          totalStands: { type: "integer", example: 25 },
+          disponibles: { type: "integer", example: 15 },
+          ocupados: { type: "integer", example: 10 },
+          porcentajeOcupacion: { type: "string", example: "40.0%" },
+        },
+      },
+    },
+  },
+};
+
+export const ReporteProductosPorArtesanoRespuesta = {
+  type: "array",
+  items: {
+    type: "object",
+    required: ["emprendimientoId", "emprendimiento", "artesano", "email", "habilitado", "totalProductos", "precioPromedio"],
+    properties: {
+      emprendimientoId: { type: "string", format: "uuid", example: "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+      emprendimiento: { type: "string", example: "Telares del Valle Calchaquí" },
+      artesano: { type: "string", example: "Tejerina, Mariana" },
+      email: { type: "string", format: "email", example: "artesano1@poncho.com" },
+      habilitado: { type: "boolean", example: true },
+      rubro: { type: "string", example: "TEJIDO" },
+      stand: { type: "string", example: "Stand D-01" },
+      totalProductos: { type: "integer", example: 3 },
+      precioPromedio: { type: "number", example: 41166.83 },
+    },
+  },
+};
+
+export const ReporteTendenciasBusquedaRespuesta = {
+  type: "object",
+  required: ["periodoDias", "entidadFiltro", "totalConsultasPeriodo", "ranking"],
+  properties: {
+    periodoDias: { type: "integer", example: 30 },
+    entidadFiltro: { type: "string", example: "TODAS" },
+    totalConsultasPeriodo: { type: "integer", example: 296 },
+    ranking: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["posicion", "termino", "totalConsultas", "porcentaje"],
+        properties: {
+          posicion: { type: "integer", example: 1 },
+          termino: { type: "string", example: "poncho" },
+          totalConsultas: { type: "integer", example: 142 },
+          porcentaje: { type: "string", example: "48.0%" },
+        },
+      },
+    },
+  },
+};
