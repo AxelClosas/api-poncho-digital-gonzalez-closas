@@ -27,8 +27,8 @@ export const actualizarProductoSchema = crearProductoSchema.partial();
 
 export const consultarProductosSchema = z.object({
   busqueda: z.string().lowercase().trim().optional(),
-  emprendimientoId: uuidSchema.optional(),
-  rubroId: uuidSchema.optional(),
+  emprendimiento: z.string().lowercase().trim().optional(),
+  rubro: z.string().lowercase().trim().optional(),
   ordenPor: z.enum(["nombre", "precio", "id"]).default("id"),
   direccion: z.enum(["asc", "desc"]).default("asc"),
   pagina: z.coerce.number().int().positive().default(1),

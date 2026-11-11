@@ -27,7 +27,7 @@ const router = express.Router();
 
 
 // Rutas Públicas (Catálogo y Detalle)
-router.get("/", 
+router.get("/",
   /*
   #swagger.auto = false
   #swagger.tags = ['Productos']
@@ -35,62 +35,62 @@ router.get("/",
   #swagger.summary = 'Consultar el catálogo de productos con filtros y paginación'
 
   #swagger.parameters['busqueda'] ={
-  in: 'query',
-  description:'Búsqueda parcial por nombre o descripción, sin distinguir mayúsculas.',
-  required: false,
-  schema:{type:'string'}
+    in: 'query',
+    description:'Búsqueda parcial por nombre o descripción, sin distinguir mayúsculas.',
+    required: false,
+    type: 'string'
   }
 
   #swagger.parameters['emprendimientoId'] = {
       in: 'query',
-      description: 'Filtrar por el UUID del emprendimiento.',
+      description: 'Filtrar por el nombre del emprendimiento.',
       required: false,
-      schema: { type: 'string', format: 'uuid' }
+      type: 'string'
     }
 
-    #swagger.parameters['rubroId'] = {
+    #swagger.parameters['rubro'] = {
       in: 'query',
-      description: 'Filtrar por el UUID del rubro del emprendimiento.',
+      description: 'Filtrar por el nombre del rubro del emprendimiento.',
       required: false,
-      schema: { type: 'string', format: 'uuid' }
+      type: 'string'
     }
 
     #swagger.parameters['ordenPor'] = {
       in: 'query',
       required: false,
+      type: 'string',
       schema: {
-        type: 'string',
-        enum: ['nombre', 'precio', 'id'],
-        default: 'id'
-      }
+        '@enum': ['nombre', 'precio', 'id'],
+      },
+      default: 'id'
     }
 
     #swagger.parameters['direccion'] = {
       in: 'query',
       required: false,
+      type: 'string',
       schema: {
-        type: 'string',
-        enum: ['asc', 'desc'],
-        default: 'asc'
-      }
+        '@enum': ['asc', 'desc'],
+      },
+      default: 'asc'
     }
 
     #swagger.parameters['pagina'] = {
       in: 'query',
       required: false,
-      schema: { type: 'integer', minimum: 1, default: 1 }
+      type: 'integer',
+      minimum: 1,
+      default: 1
     }
 
     #swagger.parameters['limite'] = {
       in: 'query',
       description: 'Cantidad de productos por página. Máximo: 50.',
       required: false,
-      schema: {
-        type: 'integer',
-        minimum: 1,
-        maximum: 50,
-        default: 10
-      }
+      type: 'integer',
+      minimum: 1,
+      maximum: 50,
+      default: 10
     }
 
     #swagger.responses[200] = {
@@ -109,7 +109,7 @@ router.get("/",
   validarConsulta(consultarProductosSchema),
   registrarTendencia("PRODUCTO"),
   consultarProductos);
-router.get("/:id", 
+router.get("/:id",
   /*
   #swagger.auto = false
   #swagger.tags = ['Productos']
