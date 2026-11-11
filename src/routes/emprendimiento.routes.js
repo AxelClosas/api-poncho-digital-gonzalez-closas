@@ -20,6 +20,7 @@ import {
   validarParametros,
   validarConsulta,
 } from "../middlewares/validacion.middleware.js";
+import { registrarTendencia } from "../middlewares/tendencias.middleware.js";
 
 import { autenticarUsuario } from "../middlewares/autenticacion.middleware.js";
 
@@ -64,6 +65,7 @@ router.get(
     }
   */
   validarConsulta(consultarEmprendimientosSchema),
+  registrarTendencia("EMPRENDIMIENTO"),
   obtenerTodos
 );
 
