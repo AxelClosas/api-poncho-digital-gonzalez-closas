@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { postularseSchema } from "../validators/inscripciones.schemas.js"
+import { postularseSchema, cambiarEstadoSchema } from "../validators/inscripciones.schemas.js"
 import {
   iniciarSesionSchema,
   crearAdministradorSchema,
@@ -122,6 +122,18 @@ export const PostulacionCreada = {
   }
 }
 
+
+export const CambiarEstadoInscripcion = {
+  ...z.toJSONSchema(cambiarEstadoSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    estadoId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    standId: "4fa85f64-5717-4562-b3fc-2c963f66afa6",
+    observaciones: "Postulación aprobada. Se asigna stand solicitado.",
+  },
+};
 
 /* USUARIOS */
 export const IniciarSesion = {
@@ -402,6 +414,65 @@ export const ListaPabellonesPaginada = {
         limite: { type: "integer", example: 10 },
         total: { type: "integer", example: 12 },
         totalPaginas: { type: "integer", example: 2 },
+      },
+    },
+  },
+};
+
+export const ReinscripcionCreada = {
+  type: "object",
+  required: ["mensaje", "inscripcion"],
+  properties: {
+    mensaje: {
+      type: "string",
+      example: "Inscripción registrada con éxito para la edición 2026. Su postulación se encuentra pendiente de revisión.",
+    },
+    inscripcion: {
+      type: "object",
+      required: ["id", "nroEdicion", "nroTramite", "estadoId", "usuarioId"],
+      properties: {
+        id: { type: "string", format: "uuid", example: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
+        nroEdicion: { type: "integer", example: 2026 },
+        nroTramite: { type: "integer", example: 1042 },
+        observaciones: { type: "string", nullable: true, example: null },
+        createdAt: { type: "string", format: "date-time", example: "2026-11-10T21:00:00.000Z" },
+        updatedAt: { type: "string", format: "date-time", example: "2026-11-10T21:00:00.000Z" },
+        estado: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
+            nombre: { type: "string", example: "nuevo" },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const InscripcionActualizada = {
+  type: "object",
+  required: ["id", "nroEdicion", "nroTramite", "estadoId", "usuarioId"],
+  properties: {
+    id: { type: "string", format: "uuid", example: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
+    nroEdicion: { type: "integer", example: 2026 },
+    nroTramite: { type: "integer", example: 1042 },
+    observaciones: { type: "string", nullable: true, example: "Postulación aprobada. Se asigna stand solicitado." },
+    evaluadorId: { type: "string", format: "uuid", nullable: true, example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" },
+    estado: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
+        nombre: { type: "string", example: "aprobado" },
+      },
+    },
+    evaluador: {
+      type: "object",
+      nullable: true,
+      properties: {
+        id: { type: "string", format: "uuid", example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" },
+        nombre: { type: "string", example: "Carlos" },
+        apellido: { type: "string", example: "Administrador" },
+        email: { type: "string", format: "email", example: "admin@poncho.gob.ar" },
       },
     },
   },
