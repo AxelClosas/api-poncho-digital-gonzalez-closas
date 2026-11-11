@@ -19,6 +19,10 @@ import {
   crearEmprendimientoSchema,
   actualizarEmprendimientoSchema,
 } from "../validators/emprendimiento.schema.js"
+import {
+  crearEstadoSchema,
+  actualizarEstadoSchema,
+} from "../validators/estados.schemas.js"
 
 export const NuevaPostulacion = {
   ...z.toJSONSchema(postularseSchema, {
@@ -998,4 +1002,39 @@ export const EmprendimientoCreado = {
       },
     },
   },
+};
+
+/* ESTADOS */
+export const CrearEstado = {
+  ...z.toJSONSchema(crearEstadoSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "aprobado",
+  },
+};
+
+export const ActualizarEstado = {
+  ...z.toJSONSchema(actualizarEstadoSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "rechazado",
+  },
+};
+
+export const EstadoRespuesta = {
+  type: "object",
+  required: ["id", "nombre"],
+  properties: {
+    id: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6" },
+    nombre: { type: "string", example: "nuevo" },
+  },
+};
+
+export const ListaEstados = {
+  type: "array",
+  items: { $ref: "#/components/schemas/EstadoRespuesta" },
 };
