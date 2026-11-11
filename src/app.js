@@ -49,7 +49,8 @@ app.get('/',
       "productos": "/api/productos",
       "inscripciones": "/api/inscripciones",
       "roles": "/api/roles",
-      "estados": "/api/estados"
+      "estados": "/api/estados",
+      "reportes": "/api/reportes"
     }
   })
 })
