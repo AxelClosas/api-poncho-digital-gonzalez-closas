@@ -15,6 +15,10 @@ import {
   crearPabellonSchema,
   actualizarPabellonSchema,
 } from "../validators/pabellon.schema.js"
+import {
+  crearEmprendimientoSchema,
+  actualizarEmprendimientoSchema,
+} from "../validators/emprendimiento.schema.js"
 
 export const NuevaPostulacion = {
   ...z.toJSONSchema(postularseSchema, {
@@ -883,6 +887,114 @@ export const InscripcionActualizada = {
         nombre: { type: "string", example: "Carlos" },
         apellido: { type: "string", example: "Administrador" },
         email: { type: "string", format: "email", example: "admin@poncho.gob.ar" },
+      },
+    },
+  },
+};
+
+/* EMPRENDIMIENTOS */
+export const CrearEmprendimiento = {
+  ...z.toJSONSchema(crearEmprendimientoSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "Tejidos del Valle",
+    descripcion: "Elaboración de ponchos y prendas tradicionales en telar criollo.",
+    rubroId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  },
+};
+
+export const ActualizarEmprendimiento = {
+  ...z.toJSONSchema(actualizarEmprendimientoSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "Tejidos del Valle - Artesanías",
+    descripcion: "Prendas de vicuña y llama tejidas artesanalmente.",
+    rubroId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  },
+};
+
+export const EmprendimientoRespuesta = {
+  type: "object",
+  required: ["id", "nombre", "rubroId"],
+  properties: {
+    id: { type: "string", format: "uuid", example: "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+    nombre: { type: "string", example: "Tejidos del Valle" },
+    descripcion: { type: "string", nullable: true, example: "Elaboración de ponchos y prendas en telar." },
+    rubroId: { type: "string", format: "uuid", example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+    standId: { type: "string", format: "uuid", nullable: true, example: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
+    rubro: {
+      type: "object",
+      required: ["id", "nombre"],
+      properties: {
+        id: { type: "string", format: "uuid", example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+        nombre: { type: "string", example: "Textil" },
+      },
+    },
+    stand: {
+      type: "object",
+      nullable: true,
+      properties: {
+        id: { type: "string", format: "uuid", example: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
+        nombre: { type: "string", example: "Stand A1" },
+        estado: { type: "string", enum: ["DISPONIBLE", "OCUPADO"], example: "OCUPADO" },
+      },
+    },
+  },
+};
+
+export const ListaEmprendimientosPaginada = {
+  type: "object",
+  required: ["emprendimientos", "paginacion"],
+  properties: {
+    emprendimientos: {
+      type: "array",
+      items: { $ref: "#/components/schemas/EmprendimientoRespuesta" },
+    },
+    paginacion: {
+      type: "object",
+      required: ["pagina", "limite", "total", "totalPaginas"],
+      properties: {
+        pagina: { type: "integer", example: 1 },
+        limite: { type: "integer", example: 10 },
+        total: { type: "integer", example: 35 },
+        totalPaginas: { type: "integer", example: 4 },
+      },
+    },
+  },
+};
+
+export const EmprendimientoCreado = {
+  type: "object",
+  required: ["nuevoEmprendimiento", "nuevaInscripcion"],
+  properties: {
+    nuevoEmprendimiento: {
+      type: "object",
+      required: ["id", "nombre", "rubroId", "usuarioId"],
+      properties: {
+        id: { type: "string", format: "uuid", example: "7c9e6679-7425-40de-944b-e07fc1f90ae7" },
+        nombre: { type: "string", example: "Tejidos del Valle" },
+        descripcion: { type: "string", nullable: true, example: "Elaboración de ponchos y prendas tradicionales." },
+        rubroId: { type: "string", format: "uuid", example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+        usuarioId: { type: "string", format: "uuid", example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" },
+        standId: { type: "string", format: "uuid", nullable: true, example: null },
+        createdAt: { type: "string", format: "date-time", example: "2026-11-10T20:00:00.000Z" },
+        updatedAt: { type: "string", format: "date-time", example: "2026-11-10T20:00:00.000Z" },
+      },
+    },
+    nuevaInscripcion: {
+      type: "object",
+      required: ["id", "nroEdicion", "nroTramite", "estadoId", "usuarioId"],
+      properties: {
+        id: { type: "string", format: "uuid", example: "b2c3d4e5-f6a7-8901-bcde-f12345678901" },
+        nroEdicion: { type: "integer", example: 2026 },
+        nroTramite: { type: "integer", example: 1042 },
+        observaciones: { type: "string", nullable: true, example: null },
+        createdAt: { type: "string", format: "date-time", example: "2026-11-10T20:00:00.000Z" },
+        updatedAt: { type: "string", format: "date-time", example: "2026-11-10T20:00:00.000Z" },
       },
     },
   },

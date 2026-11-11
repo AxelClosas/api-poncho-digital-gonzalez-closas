@@ -36,8 +36,6 @@ export const crear = async (req, res, next) => {
     const usuarioDTO = req.contextoUsuario
     const emprendimientoDTO = req.bodyValidado
 
-    console.log('ESTO LLEGA AL BODY DEL POST: ', req.bodyValidado)
-
     const emprendimiento =
       await emprendimientoService.crearEmprendimiento(usuarioDTO, emprendimientoDTO);
 
