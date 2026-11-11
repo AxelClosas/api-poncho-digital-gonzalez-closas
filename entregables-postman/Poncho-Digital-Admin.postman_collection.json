@@ -1,0 +1,928 @@
+{
+  "info": {
+    "name": "Poncho Digital - Flujo admin (correcciones propuestas)",
+    "description": "Leer LEEME-CORRECCIONES.md. Las correcciones no estan implementadas. Ejecutar manualmente en orden con dos artesanos y productos precargados. Quitar stand significa desasignar, no borrar el stand.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{adminToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "superadminEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "superadminPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "localidadId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rubroId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "postulanteEmail",
+      "value": "lucas.demo@example.com",
+      "type": "string"
+    },
+    {
+      "key": "postulanteCuil",
+      "value": "20345678901",
+      "type": "string"
+    },
+    {
+      "key": "inscripcionNuevaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "estadoAprobadoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "estadoRechazadoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inscripcionRechazarId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inscripcionSinStandId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inscripcionConStandId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "standDisponibleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otroStandDisponibleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "standAnteriorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emprendimientoSinStandId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emprendimientoConStandId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Consultar rubros",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/rubros",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Crear postulacion desde cero",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/postularse",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Lucas\",\n  \"apellido\": \"Pereyra\",\n  \"cuil\": \"{{postulanteCuil}}\",\n  \"fechaNacimiento\": \"1995-05-15\",\n  \"sexo\": \"M\",\n  \"email\": \"{{postulanteEmail}}\",\n  \"password\": \"Artesano123!\",\n  \"localidadId\": \"{{localidadId}}\",\n  \"emprendimiento\": {\n    \"nombre\": \"Tejidos del Valle\",\n    \"descripcion\": \"Tejidos artesanales de lana.\",\n    \"rubroId\": \"{{rubroId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"localidadId\",\"rubroId\",\"postulanteEmail\",\"postulanteCuil\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.unset('inscripcionNuevaId');",
+              "if(pm.response.code===201) pm.collectionVariables.set('inscripcionNuevaId',pm.response.json().inscripcion.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Login superadmin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios/login",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{superadminEmail}}\",\n  \"password\": \"{{superadminPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"superadminEmail\",\"superadminPassword\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.unset('adminToken');",
+              "if(pm.response.code===200) pm.collectionVariables.set('adminToken',pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Capturar estados",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/estados",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.unset('estadoAprobadoId');pm.collectionVariables.unset('estadoRechazadoId');",
+              "if(pm.response.code===200){const estados=pm.response.json();for(const [nombre,key] of [['aprobado','estadoAprobadoId'],['rechazado','estadoRechazadoId']]){const e=estados.find(x=>x.nombre.toLowerCase()===nombre);pm.test('Existe '+nombre,()=>pm.expect(e).to.exist);if(e)pm.collectionVariables.set(key,e.id);}}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Consultar inscripciones",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/inscripciones?pagina=1&limite=50",
+        "description": "Elegir una pendiente para rechazar y las aprobadas de ambos artesanos. Completar las variables de inscripcion antes de continuar."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Aprobar nueva postulacion",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/{{inscripcionNuevaId}}/estado",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoId\": \"{{estadoAprobadoId}}\",\n  \"observaciones\": \"05 - Aprobar nueva postulacion\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"inscripcionNuevaId\",\"estadoAprobadoId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Estado esperado',()=>pm.expect(pm.response.json().estadoId).to.eql(pm.collectionVariables.get('estadoAprobadoId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Rechazar inscripcion precargada",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/{{inscripcionRechazarId}}/estado",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoId\": \"{{estadoRechazadoId}}\",\n  \"observaciones\": \"06 - Rechazar inscripcion precargada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"inscripcionRechazarId\",\"estadoRechazadoId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Estado esperado',()=>pm.expect(pm.response.json().estadoId).to.eql(pm.collectionVariables.get('estadoRechazadoId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Validar artesanos y capturar emprendimientos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/inscripciones?estadoId={{estadoAprobadoId}}&pagina=1&limite=50",
+        "description": "Si alguno no aparece, ajustar pagina. Deben ser dos inscripciones aprobadas de usuarios distintos."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"estadoAprobadoId\",\"inscripcionSinStandId\",\"inscripcionConStandId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200){const list=pm.response.json().inscripciones;for(const [ik,ek,withStand] of [['inscripcionSinStandId','emprendimientoSinStandId',false],['inscripcionConStandId','emprendimientoConStandId',true]]){pm.collectionVariables.unset(ek);if(withStand)pm.collectionVariables.unset('standAnteriorId');const i=list.find(x=>x.id===pm.collectionVariables.get(ik));pm.test('Inscripcion encontrada '+ik,()=>pm.expect(i).to.exist);if(i){const e=i.usuario.emprendimiento;pm.test('Tiene emprendimiento '+ik,()=>pm.expect(e).to.exist);if(e){pm.collectionVariables.set(ek,e.id);pm.test('Condicion inicial de stand '+ik,()=>pm.expect(Boolean(e.standId)).to.eql(withStand));if(withStand&&e.standId)pm.collectionVariables.set('standAnteriorId',e.standId);}}}}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Consultar productos del artesano sin stand",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/productos?emprendimientoId={{emprendimientoSinStandId}}&pagina=1&limite=50",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"emprendimientoSinStandId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Consultar productos del artesano con stand",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/productos?emprendimientoId={{emprendimientoConStandId}}&pagina=1&limite=50",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"emprendimientoConStandId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Verificar primer stand disponible",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{standDisponibleId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"standDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand DISPONIBLE',()=>pm.expect(pm.response.json().estado).to.eql('DISPONIBLE'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Verificar segundo stand disponible",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{otroStandDisponibleId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"otroStandDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand DISPONIBLE',()=>pm.expect(pm.response.json().estado).to.eql('DISPONIBLE'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Asignar stand al artesano sin stand",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/{{inscripcionSinStandId}}/estado",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoId\": \"{{estadoAprobadoId}}\",\n  \"observaciones\": \"11 - Asignar stand al artesano sin stand\",\n  \"standId\": \"{{standDisponibleId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"inscripcionSinStandId\",\"estadoAprobadoId\",\"standDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Estado esperado',()=>pm.expect(pm.response.json().estadoId).to.eql(pm.collectionVariables.get('estadoAprobadoId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Verificar primer stand ocupado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{standDisponibleId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"standDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand OCUPADO',()=>pm.expect(pm.response.json().estado).to.eql('OCUPADO'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 - Cambiar stand del otro artesano",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/{{inscripcionConStandId}}/estado",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoId\": \"{{estadoAprobadoId}}\",\n  \"observaciones\": \"13 - Cambiar stand del otro artesano\",\n  \"standId\": \"{{otroStandDisponibleId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"inscripcionConStandId\",\"estadoAprobadoId\",\"otroStandDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Estado esperado',()=>pm.expect(pm.response.json().estadoId).to.eql(pm.collectionVariables.get('estadoAprobadoId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 - Verificar stand anterior liberado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{standAnteriorId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"standAnteriorId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand DISPONIBLE',()=>pm.expect(pm.response.json().estado).to.eql('DISPONIBLE'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 - Verificar nuevo stand ocupado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{otroStandDisponibleId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"otroStandDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand OCUPADO',()=>pm.expect(pm.response.json().estado).to.eql('OCUPADO'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 - Modificar nombre del stand asignado",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/stands/{{otroStandDisponibleId}}",
+        "description": "Edita el nombre del stand fisico asignado, conservando su estado y sector.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Stand demo actualizado {{$timestamp}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"otroStandDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 - Quitar asignacion de stand",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inscripciones/{{inscripcionConStandId}}/estado",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoId\": \"{{estadoAprobadoId}}\",\n  \"observaciones\": \"17 - Quitar asignacion de stand\",\n  \"standId\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\",\"inscripcionConStandId\",\"estadoAprobadoId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Estado esperado',()=>pm.expect(pm.response.json().estadoId).to.eql(pm.collectionVariables.get('estadoAprobadoId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 - Verificar stand nuevamente disponible",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/stands/{{otroStandDisponibleId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"otroStandDisponibleId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Stand DISPONIBLE',()=>pm.expect(pm.response.json().estado).to.eql('DISPONIBLE'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 - Verificar emprendimiento sin stand",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/emprendimientos/{{emprendimientoConStandId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"emprendimientoConStandId\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200)pm.test('Sin stand asignado',()=>pm.expect(pm.response.json().standId).to.eql(null));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 - Cerrar sesion",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/logout",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const required=[\"adminToken\"];",
+              "const missing=required.filter(k => !pm.variables.get(k));",
+              "if(missing.length){pm.execution.skipRequest();throw new Error('Completar variables: '+missing.join(', '));}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 204', () => pm.response.to.have.status(204));",
+              "if(pm.response.code===204)pm.collectionVariables.unset('adminToken');"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 import { z } from "zod";
+import uuidSchema from "./UUID.schema.js";
 
 export const estadoIdParamSchema = z
   .object({
-    id: z.coerce.number().int().positive("El ID del estado debe ser un entero positivo."),
+    id: uuidSchema, // Antes: id: z.coerce.number().int().positive("El ID del estado debe ser un entero positivo."),
   })
   .strict();
 

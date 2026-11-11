@@ -343,7 +343,7 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
       throw crearError("No podés evaluar tu propia postulación.", 403);
     }
 
-    if (inscripcion.estadoId === estadoId) {
+    if (inscripcion.estadoId === estadoId && standId === undefined) { // Antes: if (inscripcion.estadoId === estadoId) {
       throw crearError("El estado indicado es el mismo que el actual.", 409);
     }
 
@@ -476,3 +476,20 @@ export const cambiarEstadoInscripcion = async (id, datos, evaluadorId) => {
     });
   });
 };
+
+
+/*
+f (inscripcion.estadoId === estadoId) {
+  throw crearError("El estado indicado es el mismo que el actual.", 409);
+}
+En src/validators/inscripciones.schemas.js, dentro de cambiarEstadoSchema:
+estadoId: uuidSchema.nullable().optional(),
+En src/validators/estados.schemas.js:
+export const estadoIdParamSchema = z
+  .object({
+    id: z.coerce.number().int().positive("El ID del estado debe ser un entero positivo."),
+  })
+  .strict();
+Ese último archivo tampoco tenía este import, que agregué:
+import uuidSchema from "./UUID.schema.js";
+*/
