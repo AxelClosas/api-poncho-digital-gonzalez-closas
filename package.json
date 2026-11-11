@@ -12,6 +12,8 @@
   "bugs": {
     "url": "https://github.com/AxelClosas/api-poncho-digital-gonzalez-closas/issues"
   },
+
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AxelClosas/api-poncho-digital-gonzalez-closas.git"
@@ -25,7 +27,10 @@
     "dev": "node --watch src/app.js",
     "iniciar": "node scripts/inicializar-bd.js",
     "admin": "node scripts/inicializarAdmin.js",
-    "docs": "node generar-docs.js"
+    "docs": "node generar-docs.js",
+    "test": "node --test tests/producotos.schema.test.js",
+    "test:integration": "node --env-file=.env.test --test --test-concurrency=1 tests/producots.integration.test.js",
+    "test:all": "npm run test && npm run test:integration"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -47,4 +52,6 @@
     "prisma@7.10.0": true,
     "bcrypt@6.0.0": true
   }
+
 }
+
