@@ -156,7 +156,7 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
   }
 
   if (producto.emprendimiento.usuarioId !== usuarioId) {
-    throw crearError("No tienes permiso para modificar un producto que no es de tu autoría.", 403);
+    throw crearError("No tienes permiso para modificar un producto que no es de tu autoría.", 404);
   }
 
   return prisma.producto.update({
@@ -181,7 +181,7 @@ export const eliminarProducto = async (productoId, usuarioId) => {
   }
 
   if (producto.emprendimiento.usuarioId !== usuarioId) {
-    throw crearError("No tienes permiso para eliminar este producto.", 403);
+    throw crearError("No tienes permiso para eliminar este producto.", 404);
   }
 
   return prisma.producto.delete({
