@@ -18,12 +18,18 @@ export async function migrar() {
   console.log('Iniciando migración de datos geográficos...');
 
   try {
+    const cantidadProvincias = await prisma.provincia.count();
+    if (cantidadProvincias > 0) {
+      console.log(`Datos geográficos ya presentes (${cantidadProvincias} provincias). Omitiendo descarga.`);
+      return;
+    }
+
     // ----------------------------------------------------
     // 1. PROVINCIAS
     // ----------------------------------------------------
     console.log('Descargando provincias...');
     const dataProvincias = await obtenerDatos('provincias', { max: 100 });
-    
+
     const provincias = dataProvincias.provincias.map((p) => ({
       id: parseInt(p.id, 10),
       nombre: p.nombre,
@@ -41,7 +47,7 @@ export async function migrar() {
     console.log('Descargando departamentos...');
     // Hay aprox. 530 departamentos en Argentina
     const dataDepartamentos = await obtenerDatos('departamentos', { max: 1000 });
-    
+
     const departamentos = dataDepartamentos.departamentos.map((d) => ({
       id: parseInt(d.id, 10),
       nombre: d.nombre,
@@ -79,8 +85,6 @@ export async function migrar() {
     console.log('Migración completada con éxito.');
   } catch (error) {
     console.error('Error durante la migración:', error);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
+    throw error;
   }
 }
