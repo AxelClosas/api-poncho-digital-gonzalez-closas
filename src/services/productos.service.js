@@ -23,6 +23,39 @@ export const crearProducto = async (usuarioId, datos) => {
     );
   }
 
+  // 2. Verificamos que el usuario esté habilitado
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: usuarioId },
+    select: { habilitado: true },
+  });
+
+  if (!usuario || !usuario.habilitado) {
+    throw crearError(
+      "Tu cuenta no se encuentra habilitada para cargar productos. Debe ser validada previamente por un administrador.",
+      403
+    );
+  }
+
+  // 3. Verificamos que la inscripción para la edición actual esté aprobada
+  const nroEdicion = new Date().getFullYear();
+  const inscripcionActual = await prisma.inscripcion.findFirst({
+    where: {
+      usuarioId,
+      nroEdicion,
+    },
+    include: {
+      estado: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!inscripcionActual || inscripcionActual.estado.nombre.toLowerCase() !== "aprobado") {
+    throw crearError(
+      "No podés cargar productos porque tu postulación no se encuentra en estado 'aprobado'.",
+      403
+    );
+  }
+
   // 2. Creamos el producto asociado
   return prisma.producto.create({
     data: {
@@ -111,9 +144,11 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
   // Comprobamos existencia y pertenencia
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento : {
-      select: { usuarioId: true }
-    } },
+    include: {
+      emprendimiento: {
+        select: { usuarioId: true }
+      }
+    },
   });
 
   if (!producto) {
@@ -134,9 +169,11 @@ export const actualizarProducto = async (productoId, usuarioId, datos) => {
 export const eliminarProducto = async (productoId, usuarioId) => {
   const producto = await prisma.producto.findUnique({
     where: { id: productoId },
-    include: { emprendimiento: {
-      select: { usuarioId: true }
-    } },
+    include: {
+      emprendimiento: {
+        select: { usuarioId: true }
+      }
+    },
   });
 
   if (!producto) {

@@ -20,13 +20,23 @@ export const consultarInscripciones = async (req, res, next) => {
 
 export const cambiarEstadoInscripcion = async (req, res, next) => {
   try {
-    const evaluadorId = req.usuario?.id; // Inyectado por autenticarUsuario
+    const evaluadorId = req.contextoUsuario?.id ?? req.usuario?.id;
     const inscripcion = await inscripcionesService.cambiarEstadoInscripcion(
       req.parametrosValidados.id,
       req.bodyValidado,
       evaluadorId
     );
     return res.status(200).json(inscripcion);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const inscribirseNuevaEdicion = async (req, res, next) => {
+  try {
+    const usuarioId = req.contextoUsuario?.id ?? req.usuario?.id;
+    const resultado = await inscripcionesService.inscribirseNuevaEdicion(usuarioId);
+    return res.status(201).json(resultado);
   } catch (error) {
     return next(error);
   }

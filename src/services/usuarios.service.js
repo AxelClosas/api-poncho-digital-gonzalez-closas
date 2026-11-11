@@ -11,6 +11,7 @@ const proyeccionUsuario = {
   sexo: true,
   email: true,
   activo: true,
+  habilitado: true,
   ultimoAcceso: true,
   createdAt: true,
   localidad: {
