@@ -65,8 +65,14 @@ export const consultarInscripcionesSchema = z.object({
 // Schema para cambiar el estado de la inscripción (Admin)
 export const cambiarEstadoSchema = z
   .object({
-    estadoId: uuidSchema,
+    estadoId: uuidSchema.nullable().optional(),
     standId: uuidSchema.nullable().optional(), // Opcional si se aprueba y se asigna stand
+    observaciones: z
+      .string()
+      .trim()
+      .max(1000, "Las observaciones no pueden superar los 1000 caracteres.")
+      .nullable()
+      .optional(),
   })
   .strict();
 

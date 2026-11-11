@@ -31,3 +31,13 @@ export const cambiarEstadoInscripcion = async (req, res, next) => {
     return next(error);
   }
 };
+
+export const inscribirseNuevaEdicion = async (req, res, next) => {
+  try {
+    const usuarioId = req.contextoUsuario?.id ?? req.usuario?.id;
+    const resultado = await inscripcionesService.inscribirseNuevaEdicion(usuarioId);
+    return res.status(201).json(resultado);
+  } catch (error) {
+    return next(error);
+  }
+};
