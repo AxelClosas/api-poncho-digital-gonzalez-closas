@@ -199,3 +199,13 @@ model TokenRevocado {
 
   @@index([venceEn])
 }
+
+model RegistroBusqueda {
+  id        String   @id @default(uuid()) @db.Uuid
+  termino   String   @db.VarChar(100)
+  entidad   String   // "PRODUCTO", "EMPRENDIMIENTO", etc.
+  createdAt DateTime @default(now())
+
+  @@index([termino])
+  @@index([createdAt])
+}
