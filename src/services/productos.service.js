@@ -23,28 +23,37 @@ export const crearProducto = async (usuarioId, datos) => {
     );
   }
 
-  const usuarioHabilitado = await prisma.usuario.findFirst({
+  // 2. Verificamos que el usuario esté habilitado
+  const usuario = await prisma.usuario.findUnique({
     where: { id: usuarioId },
-    select: { habilitado: true }
-  })
+    select: { habilitado: true },
+  });
 
-  const estadoInscripcion = await prisma.inscripcion.findFirst({
+  if (!usuario || !usuario.habilitado) {
+    throw crearError(
+      "Tu cuenta no se encuentra habilitada para cargar productos. Debe ser validada previamente por un administrador.",
+      403
+    );
+  }
+
+  // 3. Verificamos que la inscripción para la edición actual esté aprobada
+  const nroEdicion = new Date().getFullYear();
+  const inscripcionActual = await prisma.inscripcion.findFirst({
     where: {
-      usuarioId: usuarioId
+      usuarioId,
+      nroEdicion,
     },
-    select: {
-      estado: {
-        select: {
-          nombre: true
-        }
-      }
-    }
-  })
+    include: {
+      estado: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-  console.log("ESTADO DE INSCRIPCIÓN: ", estadoInscripcion.estado.nombre)
-
-  if (usuarioHabilitado && estadoInscripcion.estado.nombre === "solicitud_cambio") {
-    throw crearError("Cuenta no habilitada para agregar productos. Si considera que es un error, consulte con un administrador del sistema.", 403)
+  if (!inscripcionActual || inscripcionActual.estado.nombre.toLowerCase() !== "aprobado") {
+    throw crearError(
+      "No podés cargar productos porque tu postulación no se encuentra en estado 'aprobado'.",
+      403
+    );
   }
 
   // 2. Creamos el producto asociado
