@@ -8,6 +8,10 @@ import {
 
 import { asignarRolSchema, eliminarRolSchema } from "../validators/roles.schemas.js"
 import {
+  crearRubroSchema,
+  actualizarRubroSchema,
+} from "../validators/rubro.schema.js"
+import {
   crearPabellonSchema,
   actualizarPabellonSchema,
 } from "../validators/pabellon.schema.js"
@@ -419,6 +423,412 @@ export const ListaPabellonesPaginada = {
   },
 };
 
+//PRODUCTOS
+
+export const CrearProducto = {
+  type: "object",
+  additionalProperties: false,
+  required: ["nombre", "precio"],
+  properties: {
+    nombre: {
+      type: "string",
+      minLength: 2,
+      maxLength: 100,
+      example: "Poncho artesanal"
+    },
+    descripcion: {
+      type: "string",
+      nullable: true,
+      maxLength: 500,
+      example: "Tejido a mano con lana de oveja."
+    },
+    precio: {
+      type: "number",
+      minimum: 0,
+      exclusiveMinimum: true,
+      maximum: 99999999.99,
+      example: 45000.50
+    }
+  }
+};
+
+export const ActualizarProducto = {
+  type: "object",
+  additionalProperties: false,
+  properties: CrearProducto.properties
+  };
+
+export const Producto = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "Poncho artesanal" },
+    descripcion: { type: "string", nullable: true },
+    // Prisma serializa Decimal como string en las respuestas JSON.
+    precio: { type: "string", example: "45000.5" },
+    emprendimientoId: { type: "string", format: "uuid" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" }
+  }
+};
+
+export const ProductoDetalle = {
+  allOf: [
+    { $ref: "#/components/schemas/Producto" },
+    {
+      type: "object",
+      properties: {
+        emprendimiento: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            nombre: { type: "string" },
+            rubro: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                nombre: { type: "string" }
+              }
+            },
+            stand: {
+              type: "object",
+              nullable: true,
+              properties: {
+                id: { type: "string", format: "uuid" },
+                nombre: { type: "string" },
+                estado: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+};
+
+export const ListaProductosPaginada = {
+  type: "object",
+  properties: {
+    productos: {
+      type: "array",
+      items: { $ref: "#/components/schemas/ProductoDetalle" }
+    },
+    paginacion: {
+      type: "object",
+      properties: {
+        pagina: { type: "integer", example: 1 },
+        limite: { type: "integer", example: 10 },
+        total: { type: "integer", example: 25 },
+        totalPaginas: { type: "integer", example: 3 }
+      }
+    }
+  }
+};
+
+//SECTORES
+
+export const CrearSector = {
+  type: "object",
+  additionalProperties: false,
+  required: ["nombre", "pabellonId"],
+  properties: {
+    nombre: {
+      type: "string",
+      minLength: 1,
+      maxLength: 100,
+      example: "Sector Textiles"
+    },
+    descripcion: {
+      type: "string",
+      nullable: true,
+      maxLength: 500,
+      example: "Espacio para tejidos artesanales."
+    },
+    pabellonId: {
+      type: "string",
+      format: "uuid"
+    }
+  }
+};
+
+export const ActualizarSector = {
+  type: "object",
+  additionalProperties: false,
+  properties: CrearSector.properties
+};
+
+export const SectorRespuesta = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "Sector Textiles" },
+    descripcion: { type: "string", nullable: true },
+    pabellonId: { type: "string", format: "uuid" },
+    pabellon: {
+      $ref: "#/components/schemas/PabellonRespuesta"
+    }
+  }
+};
+
+export const SectorDetalle = {
+  allOf: [
+    { $ref: "#/components/schemas/SectorRespuesta" },
+    {
+      type: "object",
+      properties: {
+        stands: {
+          type: "array",
+          items: { $ref: "#/components/schemas/StandBase" }
+        }
+      }
+    }
+  ]
+};
+
+export const ListaSectoresPaginada = {
+  type: "object",
+  properties: {
+    sectores: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          nombre: { type: "string" },
+          pabellon: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              nombre: { type: "string" }
+            }
+          },
+          stands: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                nombre: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    paginacion: {
+      type: "object",
+      properties: {
+        pagina: { type: "integer", example: 1 },
+        limite: { type: "integer", example: 10 },
+        total: { type: "integer", example: 20 },
+        totalPaginas: { type: "integer", example: 2 }
+      }
+    }
+  }
+};
+
+//STANDS
+
+export const CrearStand = {
+  type: "object",
+  additionalProperties: false,
+  required: ["nombre", "sectorId"],
+  properties: {
+    nombre: {
+      type: "string",
+      minLength: 1,
+      example: "Stand A1"
+    },
+    sectorId: {
+      type: "string",
+      format: "uuid"
+    },
+    estado: {
+      type: "string",
+      enum: ["DISPONIBLE", "OCUPADO"],
+      description:
+        "El validador acepta este campo, pero actualmente el servicio de creación lo ignora y utiliza DISPONIBLE."
+    }
+  }
+};
+
+export const ActualizarStand = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    nombre: {
+      type: "string",
+      minLength: 1,
+      example: "Stand A2"
+    },
+    sectorId: {
+      type: "string",
+      format: "uuid"
+    },
+    estado: {
+      type: "string",
+      enum: ["DISPONIBLE", "OCUPADO"],
+      example: "DISPONIBLE"
+    }
+  }
+};
+
+export const StandBase = {
+  type: "object",
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "Stand A1" },
+    estado: {
+      type: "string",
+      enum: ["DISPONIBLE", "OCUPADO"]
+    },
+    sectorId: { type: "string", format: "uuid" }
+  }
+};
+
+export const StandDetalle = {
+  allOf: [
+    { $ref: "#/components/schemas/StandBase" },
+    {
+      type: "object",
+      properties: {
+        sector: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            nombre: { type: "string" },
+            descripcion: { type: "string", nullable: true },
+            pabellonId: { type: "string", format: "uuid" }
+          }
+        }
+      }
+    }
+  ]
+};
+
+export const ListaStands = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      nombre: { type: "string", example: "Stand A1" },
+      sector: {
+        type: "object",
+        properties: {
+          nombre: { type: "string", example: "Sector Textiles" },
+          pabellon: {
+            type: "object",
+            properties: {
+              nombre: {
+                type: "string",
+                example: "Pabellón Artesanías"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+};
+
+
+// ROLES
+export const CrearRol = {
+  type: "object",
+  additionalProperties: false,
+  required: ["nombre"],
+  properties: {
+    nombre: {
+      type: "string",
+      minLength: 3,
+      maxLength: 50,
+      description: "Se eliminan espacios de los extremos y se convierte a mayusculas.",
+      example: "ARTESANO"
+    }
+  }
+};
+
+export const ActualizarRol = { ...CrearRol };
+
+export const RolRespuesta = {
+  type: "object",
+  required: ["id", "nombre"],
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "ARTESANO" }
+  }
+};
+
+export const ListaRoles = {
+  type: "array",
+  items: { $ref: "#/components/schemas/RolRespuesta" }
+};
+
+// RUBROS
+export const CrearRubro = {
+  ...z.toJSONSchema(crearRubroSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    nombre: "Textil",
+    descripcion: "Tejidos y productos textiles artesanales.",
+  },
+};
+
+export const ActualizarRubro = {
+  ...z.toJSONSchema(actualizarRubroSchema, {
+    target: "openapi-3.0",
+    io: "input",
+  }),
+  example: {
+    descripcion: "Tejidos artesanales en lana e hilo.",
+  },
+};
+
+export const RubroRespuesta = {
+  type: "object",
+  required: ["id", "nombre", "descripcion"],
+  properties: {
+    id: { type: "string", format: "uuid" },
+    nombre: { type: "string", example: "Textil" },
+    descripcion: {
+      type: "string",
+      nullable: true,
+      example: "Tejidos y productos textiles artesanales.",
+    },
+  },
+};
+
+export const RubroDetalle = {
+  allOf: [
+    { $ref: "#/components/schemas/RubroRespuesta" },
+    {
+      type: "object",
+      required: ["emprendimientos"],
+      properties: {
+        emprendimientos: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["id", "nombre"],
+            properties: {
+              id: { type: "string", format: "uuid" },
+              nombre: { type: "string", example: "Tejidos del Valle" },
+            },
+          },
+        },
+      },
+    },
+  ],
+};
+
+export const ListaRubros = {
+  type: "array",
+  items: { $ref: "#/components/schemas/RubroRespuesta" },
+};
+
+/* INSCRIPCIONES */
 export const ReinscripcionCreada = {
   type: "object",
   required: ["mensaje", "inscripcion"],
