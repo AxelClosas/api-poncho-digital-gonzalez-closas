@@ -54,7 +54,7 @@ export const postularseSchema = z
 // Schema para consultar y filtrar inscripciones (Admin)
 export const consultarInscripcionesSchema = z.object({
   nroEdicion: z.coerce.number().int().positive().optional(),
-  estadoId: z.coerce.number().int().positive().optional(),
+  estadoId: uuidSchema.optional(),
   busqueda: z.string().trim().optional(), // Buscar por nombre de usuario o emprendimiento
   ordenPor: z.enum(["createdAt", "nroTramite"]).default("createdAt"),
   direccion: z.enum(["asc", "desc"]).default("desc"),
@@ -65,8 +65,14 @@ export const consultarInscripcionesSchema = z.object({
 // Schema para cambiar el estado de la inscripción (Admin)
 export const cambiarEstadoSchema = z
   .object({
-    estadoId: uuidSchema,
+    estadoId: uuidSchema.nullable().optional(),
     standId: uuidSchema.nullable().optional(), // Opcional si se aprueba y se asigna stand
+    observaciones: z
+      .string()
+      .trim()
+      .max(1000, "Las observaciones no pueden superar los 1000 caracteres.")
+      .nullable()
+      .optional(),
   })
   .strict();
 
