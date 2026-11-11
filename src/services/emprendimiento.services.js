@@ -85,15 +85,53 @@ export const obtenerEmprendimientoPorId = async (id) => {
   return emprendimiento;
 };
 
-// export const crearEmprendimiento = async (datos) => {
-//     return await prisma.emprendimiento.create({
-//         data: {
-//             nombre: datos.nombre,
-//             descripcion: datos.descripcion,
-//             localidad: datos.localidad
-//         }
-//     });
-// };
+export const crearEmprendimiento = async (usuario, emprendimiento) => {
+  const nroEdicion = new Date().getFullYear()
+  const inscripcionExistente = await prisma.inscripcion.count({
+    where: { usuarioId: usuario.id, nroEdicion }
+  })
+
+  if (inscripcionExistente)
+    throw crearError("El usuario ya registra una inscripción para esta edición.", 400)
+
+  const existeRubro = await prisma.rubro.count({ where: { id: emprendimiento.rubroId } })
+
+  if (!existeRubro)
+    throw crearError("El rubro indicado no existe.", 404)
+
+
+  if (!usuario.emprendimiento) {
+    return await prisma.$transaction(async (tx) => {
+      const estadoNuevaInscripcion = await tx.estado.findFirst({
+        where: { nombre: { contains: "nuevo", mode: "insensitive" } }
+      })
+
+      if (!estadoNuevaInscripcion)
+        throw crearError("No se encuentra el estado 'nuevo'.", 404)
+
+      const nuevoEmprendimiento = await tx.emprendimiento.create({
+        data: {
+          nombre: emprendimiento.nombre,
+          descripcion: emprendimiento?.descripcion ?? null,
+          rubro: { connect: { id: emprendimiento.rubroId } },
+          usuario: { connect: { id: usuario.id } }
+        },
+      })
+
+      const nuevaInscripcion = await tx.inscripcion.create({
+        data: {
+          nroEdicion,
+          usuario: { connect: { id: usuario.id } },
+          estado: { connect: { id: estadoNuevaInscripcion.id } }
+        }
+      })
+
+      return { nuevoEmprendimiento, nuevaInscripcion }
+    })
+  } else {
+    throw crearError("El usuario ya cuenta con un emprendimiento registrado.", 400)
+  }
+};
 
 export const actualizarEmprendimiento = async (
   id,
