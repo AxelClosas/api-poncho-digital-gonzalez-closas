@@ -153,6 +153,8 @@ model Inscripcion {
   estadoId String @db.Uuid
   estado   Estado @relation(fields: [estadoId], references: [id], onDelete: Restrict)
 
+  observaciones String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
